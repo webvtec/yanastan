@@ -1,1 +1,252 @@
-s
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yanastan Entertainment | Dancehall Beats</title>
+<meta name="description" content="Buy and license dancehall beats from Yanastan Entertainment.">
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#a80000;--red2:#7d0000;--gold:#c9a45c;--bg:#0a0a0a;--panel:#141010;--line:#2a1f1f;--txt:#efe6d2;--mute:#9a8f7c}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:110px}
+body{background:var(--bg);color:var(--txt);font:500 16px/1.4 Barlow,system-ui,sans-serif;padding-bottom:84px}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+a{color:var(--gold)}
+header{position:sticky;top:0;z-index:5;background:rgba(10,10,10,.96);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:20px;padding:10px 20px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font:400 14px Michroma,sans-serif;color:var(--gold);text-decoration:none;letter-spacing:.06em}
+.logo i{width:34px;height:34px;border-radius:50%;background:var(--red);display:grid;place-items:center;font:normal 18px Michroma}
+nav{display:flex;gap:20px;margin-left:auto}
+nav a{color:var(--txt);text-decoration:none;font-size:15px}
+nav a:hover{color:var(--gold)}
+#cartBtn{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--gold);font-weight:700}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hero{min-height:62vh;display:grid;align-items:end;padding:64px 20px 40px;background:linear-gradient(180deg,rgba(10,10,10,.35),var(--bg)),linear-gradient(90deg,rgba(125,0,0,.75),rgba(10,10,10,.2)),url("https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1800&q=70") center/cover,var(--red2)}
+.hero div{max-width:1100px;margin:auto;width:100%}
+.hero h1{font:400 clamp(26px,6vw,58px)/1.12 Michroma,sans-serif;color:var(--gold);max-width:16em}
+.hero p{margin:14px 0 24px;max-width:46ch;font-size:18px}
+.btn{display:inline-block;background:var(--gold);color:#000;border:0;border-radius:6px;padding:12px 22px;font-weight:700;text-decoration:none}
+.btn.red{background:var(--red);color:var(--gold)}
+section,.bar{max-width:1100px;margin:auto;padding:0 20px}
+h2{font:400 clamp(18px,3vw,24px) Michroma,sans-serif;color:var(--gold);margin:40px 0 16px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:20px}
+.bar input{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);color:var(--txt);padding:11px 16px;border-radius:24px;font:inherit}
+.chip{background:none;border:1px solid var(--line);color:var(--mute);padding:6px 14px;border-radius:20px}
+.chip.on{background:var(--red);border-color:var(--red);color:var(--gold)}
+.row{display:grid;grid-template-columns:52px minmax(0,1fr) 60px 50px minmax(0,1fr) 36px 36px auto;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line)}
+.row.h{color:var(--mute);font-size:13px;border-bottom-color:var(--red2)}
+.row.cur{background:linear-gradient(90deg,#2a0505,transparent)}
+.row.hit{outline:2px solid var(--gold)}
+.cv{width:52px;height:52px;border-radius:6px;border:0;background:var(--red) center/cover;position:relative;font:400 18px Michroma;color:var(--gold)}
+.cv b{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.45);opacity:0;border-radius:6px;font:400 14px sans-serif;color:#fff}
+.cv:hover b,.cur .cv b{opacity:1}
+.info{min-width:0}.t{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info small{display:none;color:var(--mute)}
+.tg{color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ic{width:36px;height:36px;background:none;border:0;color:var(--txt);border-radius:50%;display:grid;place-items:center}
+.ic:hover{color:var(--gold);background:var(--panel)}
+.buy{background:var(--gold);color:#000;border:0;border-radius:6px;padding:9px 14px;font-weight:700;white-space:nowrap}
+.empty{padding:36px 4px;color:var(--mute)}
+.plan{background:var(--gold);color:#000;border-radius:10px;padding:26px;max-width:340px;margin:auto;text-align:center}
+.plan h3{font-size:20px}.plan .p{font:400 38px Michroma;margin:10px 0 0}
+.plan ul{list-style:none;padding:0;margin:16px 0;font-weight:600}.plan li{margin:6px 0}
+.plan .btn{background:#000;color:var(--txt);width:100%}
+footer{max-width:1100px;margin:60px auto 0;padding:24px 20px;border-top:1px solid var(--line);color:var(--mute);display:flex;gap:28px;flex-wrap:wrap}
+footer a{display:block;margin:4px 0;text-decoration:none;color:var(--txt)}
+#bar{position:fixed;inset:auto 0 0;background:#0f0808;border-top:2px solid var(--red);padding:10px 20px;display:flex;align-items:center;gap:14px;z-index:6}
+#bar b{flex:0 1 180px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bar input{flex:1;min-width:0;accent-color:var(--gold)}
+#bar span{color:var(--mute);font-size:13px;min-width:88px;text-align:right}
+.pl{width:38px;height:38px;border-radius:50%;border:0;background:var(--red);color:var(--gold)}
+dialog{background:#120c0c;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:22px;width:min(560px,94vw);max-height:90vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.75)}
+dialog.side{margin:0 0 0 auto;height:100vh;max-height:100vh;border-radius:0;width:min(400px,100vw)}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.dh h3{font-size:19px}
+.x{background:none;border:0;font-size:26px;line-height:1;color:var(--txt)}
+.lic{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:10px}
+.lic small,.ci small{color:var(--mute);display:block}
+.ci{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.ci button{background:none;border:0;color:var(--mute);text-decoration:underline}
+dialog input{width:100%;background:#0a0606;border:1px solid var(--line);color:var(--txt);padding:11px;border-radius:6px;font:inherit;margin:10px 0}
+.tot{display:flex;justify-content:space-between;font-weight:700;font-size:18px;margin-top:14px}
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:20px;font-weight:700;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+@media(max-width:760px){
+ header{gap:8px 14px;padding:8px 14px}nav{order:3;width:100%;margin:0;justify-content:space-around;gap:10px}#cartBtn{margin-left:auto}
+ .row{grid-template-columns:52px minmax(0,1fr) 34px 34px auto;gap:8px}.row>.c,.row>.tg,.row.h{display:none}.info small{display:block}.buy{padding:9px 10px}
+ .hero{min-height:52vh}#bar span{display:none}#bar{padding:10px 14px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="#top"><i>Y</i>YANASTAN</a>
+  <nav><a href="#beats">Beats</a><a href="#memberships">Memberships</a><a href="#contact">Contact</a></nav>
+  <button id="cartBtn" aria-label="Open cart"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/></svg><span id="ct">$0.00</span></button>
+</header>
+
+<div class="hero" id="top"><div>
+  <h1>Dancehall beats, ready to record.</h1>
+  <p>Press play, pick a license and start writing. Fresh Yanastan instrumentals added all the time.</p>
+  <a class="btn" href="#beats">Browse beats</a> <a class="btn red" href="#memberships">Memberships</a>
+</div></div>
+
+<div class="bar" id="beats">
+  <input id="q" type="search" placeholder="Search beats" aria-label="Search beats">
+  <span id="chips" style="display:contents"></span>
+</div>
+<section>
+  <div class="row h"><span></span><span>Title</span><span>Time</span><span>BPM</span><span>Tags</span><span></span><span></span><span></span></div>
+  <div id="list"><p class="empty">Loading beats…</p></div>
+</section>
+
+<section id="memberships">
+  <h2>Memberships</h2>
+  <div class="plan">
+    <b>Recommended</b><h3>Artist</h3><div class="p">$35</div><b>Monthly</b>
+    <ul><li>10 untagged MP3 sample downloads</li><li>Profit use allowed</li><li>1 free custom beat or mix and master every 3 months</li><li>Access to exclusive member-only beats</li></ul>
+    <button class="btn" id="join">Join now</button>
+    <p style="font-size:13px;margin-top:12px">After cancelling you keep songs already released. New releases with membership beats need an active plan.</p>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <p>Custom beats, mixing and mastering, or questions about a license: <a id="mail" href="#"></a></p>
+</section>
+
+<footer>
+  <div><b style="color:var(--gold);font:400 15px Michroma">YANASTAN</b><p>Yanastan Entertainment</p></div>
+  <div><a href="#top">Home</a><a href="#beats">Beats</a><a href="#memberships">Memberships</a><a href="#contact">Contact</a></div>
+  <div><a href="#" data-lic>Licensing info</a><a href="#">Terms of use</a><a href="#">Privacy policy</a></div>
+</footer>
+
+<div id="bar" hidden>
+  <button class="pl" id="pp" aria-label="Play or pause">▶</button><b id="now"></b>
+  <input id="seek" type="range" min="0" max="100" value="0" aria-label="Seek"><span id="tm">0:00 / 0:00</span>
+</div>
+
+<dialog id="dLic"></dialog>
+<dialog id="dSmp"><div class="dh"><h3 id="smT">Sample download</h3><button class="x" data-x aria-label="Close">×</button></div>
+  <p>Free downloads are available on select membership plans.</p><br><a class="btn" href="#memberships" data-x>Compare membership plans</a></dialog>
+<dialog id="dCart" class="side"></dialog>
+<div id="toast" role="status"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const CONTACT = "info@yanastan.com"; // change to the producer's email
+const LIC = [["MP3 Lease","MP3 file",0],["Stems","MP3, stems and WAV",139.99],["Remake this beat (Exclusive)","MP3, stems and WAV",220],["Unlimited Stems","MP3, stems and WAV",300]];
+const app = initializeApp({
+  apiKey: "AIzaSyDZz7eQ7KieJI4A3692xFp6S0DDudyoShY",
+  authDomain: "yanastan-com.firebaseapp.com",
+  projectId: "yanastan-com",
+  storageBucket: "yanastan-com.firebasestorage.app",
+  messagingSenderId: "188003047512",
+  appId: "1:188003047512:web:dde20ba8b146b11df9922d"
+});
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = s => isFinite(s) && s ? Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0") : "0:00";
+const usd = n => "$" + Number(n).toFixed(2);
+const IC = {dl:'<svg viewBox="0 0 24 24"><path d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg>', sh:'<svg viewBox="0 0 24 24"><path d="M4 12v7h16v-7M12 3v12M7 8l5-5 5 5"/></svg>'};
+const audio = new Audio(); audio.preload = "none";
+let beats = [], shown = [], cur = null, tag = "All", cart = [];
+try { cart = JSON.parse(localStorage.getItem("yc") || "[]"); } catch {}
+$("mail").textContent = CONTACT; $("mail").href = "mailto:" + CONTACT;
+const toast = t => { const e = $("toast"); e.textContent = t; e.className = "on"; setTimeout(() => e.className = "", 2200); };
+
+onSnapshot(query(collection(db, "beats"), orderBy("createdAt", "desc")), snap => {
+  beats = snap.docs.map(d => ({ id: d.id, ...d.data() })); chips(); render();
+  const h = location.hash.slice(1), el = h && $(h); if (el && el.classList.contains("row")) { el.classList.add("hit"); el.scrollIntoView({block:"center"}); }
+}, () => $("list").innerHTML = '<p class="empty">Could not load beats. Check your connection and refresh.</p>');
+
+function chips() {
+  const t = ["All", ...new Set(beats.flatMap(b => (b.tags || "").split(",").map(x => x.trim()).filter(Boolean)))];
+  $("chips").innerHTML = t.map(x => `<button class="chip${x === tag ? " on" : ""}" data-t="${esc(x)}">${esc(x)}</button>`).join("");
+}
+$("chips").onclick = e => { if (e.target.dataset.t) { tag = e.target.dataset.t; chips(); render(); } };
+$("q").oninput = render;
+const price = b => b.price ? +b.price : 60;
+
+function render() {
+  const q = $("q").value.toLowerCase();
+  shown = beats.filter(b => (tag === "All" || (b.tags || "").toLowerCase().includes(tag.toLowerCase())) && (!q || (b.title + " " + b.tags + " " + b.bpm).toLowerCase().includes(q)));
+  $("list").innerHTML = shown.length ? shown.map((b, i) => `
+  <div class="row${cur === b.id ? " cur" : ""}" id="${esc(b.id)}">
+    <button class="cv" data-p="${i}" aria-label="Play ${esc(b.title)}" ${b.coverUrl ? `style="background-image:url('${esc(b.coverUrl)}')"` : ""}>${b.coverUrl ? "" : "Y"}<b>${cur === b.id && !audio.paused ? "❚❚" : "▶"}</b></button>
+    <div class="info"><span class="t">${esc(b.title)}</span><small>${esc(b.bpm || "-")} BPM · ${esc(b.tags)}</small></div>
+    <span class="c">${fmt(b.duration)}</span><span class="c">${esc(b.bpm || "-")}</span><span class="tg">${esc(b.tags)}</span>
+    <button class="ic" data-d="${i}" aria-label="Download sample of ${esc(b.title)}">${IC.dl}</button>
+    <button class="ic" data-s="${i}" aria-label="Share ${esc(b.title)}">${IC.sh}</button>
+    <button class="buy" data-b="${i}">${usd(price(b))}</button>
+  </div>`).join("") : '<p class="empty">No beats found. Try a different search.</p>';
+}
+
+$("list").onclick = e => {
+  const t = e.target.closest("button"); if (!t) return; const d = t.dataset;
+  if (d.p) play(shown[+d.p]);
+  if (d.d) { $("smT").textContent = "Sample download: " + shown[+d.d].title; $("dSmp").showModal(); }
+  if (d.s) share(shown[+d.s]);
+  if (d.b) openLic(shown[+d.b]);
+};
+
+async function share(b) {
+  const url = location.origin + location.pathname + "#" + b.id;
+  try { if (navigator.share) { await navigator.share({ title: b.title + " | Yanastan", text: "Listen to " + b.title, url }); return; } } catch { return; }
+  try { await navigator.clipboard.writeText(url); toast("Link copied"); } catch { prompt("Copy this link", url); }
+}
+
+function openLic(b) {
+  $("dLic").innerHTML = `<div class="dh"><h3>Choose contract type: ${esc(b.title)}</h3><button class="x" data-x aria-label="Close">×</button></div>` +
+    LIC.map((l, i) => `<div class="lic"><div><b>${l[0]}</b><small>${l[1]}</small></div><button class="buy" data-a="${i}">${usd(i ? l[2] : price(b))}</button></div>`).join("");
+  $("dLic").onclick = e => { const a = e.target.dataset.a; if (a === undefined) return;
+    add({ id: b.id + "|" + a, title: b.title, lic: LIC[a][0], price: +a ? LIC[a][2] : price(b) }); $("dLic").close(); };
+  $("dLic").showModal();
+}
+
+function add(it) {
+  if (!cart.some(c => c.id === it.id)) cart.push(it); else return toast("Already in your cart");
+  saveCart(); toast("Added to cart");
+}
+function saveCart() { try { localStorage.setItem("yc", JSON.stringify(cart)); } catch {} $("ct").textContent = usd(cart.reduce((s, c) => s + c.price, 0)); }
+function openCart(msg) {
+  const tot = cart.reduce((s, c) => s + c.price, 0);
+  $("dCart").innerHTML = `<div class="dh"><h3>Your cart</h3><button class="x" data-x aria-label="Close">×</button></div>` + (msg ? `<p>${msg}</p>` : cart.length ? cart.map((c, i) =>
+    `<div class="ci"><div><b>${esc(c.title)}</b><small>${esc(c.lic)}</small><button data-r="${i}">Remove</button></div><b>${usd(c.price)}</b></div>`).join("") +
+    `<div class="tot"><span>Total</span><span>${usd(tot)}</span></div><input id="em" type="email" placeholder="Your email" autocomplete="email" aria-label="Your email"><button class="btn" style="width:100%" data-o>Place order</button><p style="color:var(--mute);font-size:13px;margin-top:10px">The producer will email you a payment link and your files.</p>` : '<p class="empty">Your cart is empty. Add a beat to get started.</p>');
+  if (!$("dCart").open) $("dCart").showModal();
+}
+$("cartBtn").onclick = () => openCart();
+$("join").onclick = () => { add({ id: "membership", title: "Artist membership", lic: "Monthly", price: 35 }); openCart(); };
+$("dCart").onclick = async e => {
+  const d = e.target.dataset;
+  if (d.r) { cart.splice(+d.r, 1); saveCart(); openCart(); }
+  if (d.o) {
+    const em = $("em").value.trim(); if (!/^\S+@\S+\.\S+$/.test(em)) return toast("Enter a valid email");
+    e.target.disabled = true;
+    try { await addDoc(collection(db, "orders"), { email: em, items: cart, total: cart.reduce((s, c) => s + c.price, 0), status: "new", createdAt: serverTimestamp() });
+      cart = []; saveCart(); openCart("Order received. Check your email soon for payment details."); }
+    catch { e.target.disabled = false; toast("Could not send order. Try again."); }
+  }
+};
+document.addEventListener("click", e => { const x = e.target; if (x.matches("[data-x]")) x.closest("dialog").close(); else if (x.tagName === "DIALOG") x.close();
+  if (x.matches("[data-lic]")) { e.preventDefault(); toast("Licensing info coming soon"); } });
+saveCart();
+
+function play(b) {
+  if (cur === b.id) { audio.paused ? audio.play() : audio.pause(); return; }
+  cur = b.id; audio.src = b.audioUrl; audio.play(); $("bar").hidden = false; $("now").textContent = b.title;
+}
+$("pp").onclick = () => audio.paused ? audio.play() : audio.pause();
+audio.onplay = audio.onpause = () => { $("pp").textContent = audio.paused ? "▶" : "❚❚"; render(); };
+audio.ontimeupdate = () => { $("seek").value = audio.duration ? audio.currentTime / audio.duration * 100 : 0; $("tm").textContent = fmt(audio.currentTime) + " / " + fmt(audio.duration); };
+audio.onended = () => { const i = shown.findIndex(b => b.id === cur); if (shown[i + 1]) play(shown[i + 1]); };
+$("seek").oninput = e => { if (audio.duration) audio.currentTime = e.target.value / 100 * audio.duration; };
+</script>
+</body>
+</html>
