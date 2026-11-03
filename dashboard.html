@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Yanastan Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--red:#a80000;--gold:#c9a45c;--bg:#0a0a0a;--panel:#141010;--line:#2a1f1f;--txt:#efe6d2;--mute:#9a8f7c}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--txt);font:500 16px/1.4 Barlow,system-ui,sans-serif}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--line)}
+h1{font:400 15px Michroma,sans-serif;color:var(--gold)}
+h2{font:400 15px Michroma,sans-serif;color:var(--gold);margin-bottom:14px}
+.wrap{max-width:1000px;margin:auto;padding:20px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px}
+.tabs button{background:none;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
+.tabs button.on{background:var(--red);border-color:var(--red);color:var(--gold)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:20px}
+form,.grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}.full{grid-column:1/-1}
+label{display:grid;gap:4px;color:var(--mute);font-size:14px}
+label.ck{display:flex;align-items:center;gap:10px;color:var(--txt)}label.ck input{width:auto}
+input,textarea{background:#0a0606;border:1px solid var(--line);color:var(--txt);padding:10px;border-radius:6px;font:inherit;width:100%}
+button{background:var(--red);color:var(--gold);border:0;padding:10px 18px;border-radius:6px;cursor:pointer;font:inherit;font-weight:600}
+button.g{background:none;border:1px solid var(--line);color:var(--mute);padding:6px 12px}
+button.del:hover{border-color:var(--red);color:#ff6b6b}
+button:disabled{opacity:.5}
+#login{max-width:380px;margin:80px auto;padding:0 20px}#login form{grid-template-columns:1fr}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.row .m{flex:1;min-width:160px;overflow-wrap:anywhere}.row small{display:block;color:var(--mute);font-weight:400}
+.row img{width:44px;height:44px;border-radius:6px;object-fit:cover}
+.tag{font-size:13px;color:var(--mute)}.hot{color:var(--gold)}
+#msg,#smsg{min-height:20px;color:var(--gold);font-size:14px}.err{color:#ff6b6b!important}
+.empty{color:var(--mute)}
+@media(max-width:640px){form,.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<section id="login" hidden>
+  <h1 style="margin-bottom:20px">Yanastan Admin</h1>
+  <form id="lf">
+    <label>Email<input id="em" type="email" required autocomplete="username"></label>
+    <label>Password<input id="pw" type="password" required autocomplete="current-password"></label>
+    <button>Sign in</button><p id="lerr" class="err"></p>
+  </form>
+</section>
+
+<section id="app" hidden>
+  <header><h1>Yanastan Dashboard</h1><div><a href="index.html" style="color:var(--gold);margin-right:14px">View site</a><button class="g" id="out">Sign out</button></div></header>
+  <div class="wrap">
+    <div class="tabs" id="tabs">
+      <button data-t="beats" class="on">Beats</button><button data-t="orders">Orders <span id="oc"></span></button>
+      <button data-t="members">Artists <span id="mc"></span></button><button data-t="requests">Requests <span id="rc"></span></button><button data-t="site">Site</button>
+    </div>
+
+    <div id="t-beats">
+      <div class="card"><h2>Add a beat</h2>
+        <form id="af">
+          <label>Title<input id="title" required></label>
+          <label>BPM<input id="bpm" type="number" min="40" max="220"></label>
+          <label>Tags (comma separated)<input id="tags" placeholder="Dancehall, type beat"></label>
+          <label>MP3 lease price in USD (blank = $60)<input id="price" type="number" min="0" step="0.01"></label>
+          <label class="full">Preview audio, tagged (plays on the site for everyone)<input id="file" type="file" accept="audio/*"></label>
+          <label class="full">Or paste a preview audio link<input id="url" type="url" placeholder="https://..."></label>
+          <label class="full">Untagged MP3 for members (optional, private, only active members can download)<input id="untag" type="file" accept="audio/*"></label>
+          <label class="full">Cover image (optional)<input id="cover" type="file" accept="image/*"></label>
+          <label class="ck full"><input id="excl" type="checkbox"> Members-only beat (hidden from visitors who are not active members)</label>
+          <div class="full"><button id="add">Publish beat</button></div>
+          <p class="full" id="msg"></p>
+        </form>
+      </div>
+      <div class="card"><h2>All beats (<span id="n">0</span>)</h2><div id="list"></div></div>
+    </div>
+
+    <div id="t-orders" hidden><div class="card"><h2>Orders</h2><div id="orders"></div></div></div>
+    <div id="t-members" hidden><div class="card"><h2>Artists who joined</h2>
+      <p class="tag" style="margin-bottom:10px">New requests show as pending. Arrange payment, then press Activate. Activate or Renew gives 10 untagged downloads.</p><div id="members"></div></div></div>
+    <div id="t-requests" hidden><div class="card"><h2>Custom beat and mix and master requests</h2><div id="requests"></div></div></div>
+
+    <div id="t-site" hidden><div class="card"><h2>Site settings</h2>
+      <form id="sf">
+        <label class="full">Contact email shown on the site<input id="s-contact" type="email"></label>
+        <label class="full">Hero image link (blank = default photo)<input id="s-hero" type="url" placeholder="https://..."></label>
+        <label class="full">Licensing info<textarea id="s-licensing" rows="6"></textarea></label>
+        <label class="full">Terms of use<textarea id="s-terms" rows="6"></textarea></label>
+        <label class="full">Privacy policy<textarea id="s-privacy" rows="6"></textarea></label>
+        <div class="full"><button>Save settings</button></div><p class="full" id="smsg"></p>
+      </form></div></div>
+  </div>
+</section>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+
+const ADMIN_EMAIL = "YOUR_ADMIN_EMAIL_HERE"; // the producer's login email, same as in the rules
+const app = initializeApp({
+  apiKey: "AIzaSyDZz7eQ7KieJI4A3692xFp6S0DDudyoShY",
+  authDomain: "yanastan-com.firebaseapp.com",
+  projectId: "yanastan-com",
+  storageBucket: "yanastan-com.firebasestorage.app",
+  messagingSenderId: "188003047512",
+  appId: "1:188003047512:web:dde20ba8b146b11df9922d"
+});
+const auth = getAuth(app), db = getFirestore(app), st = getStorage(app);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const say = (t, bad) => { $("msg").textContent = t; $("msg").className = bad ? "err" : ""; };
+const day = t => t?.seconds ? new Date(t.seconds * 1000).toLocaleDateString() : "";
+let unsubs = [];
+
+const watch = (name, fn) => onSnapshot(query(collection(db, name), orderBy("createdAt", "desc")), s => fn(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+const none = t => `<p class="empty">${t}</p>`;
+
+onAuthStateChanged(auth, u => {
+  const ok = u && u.email === ADMIN_EMAIL;
+  $("login").hidden = !!ok; $("app").hidden = !ok;
+  unsubs.forEach(f => f()); unsubs = [];
+  if (u && !ok) { $("lerr").textContent = "This account is not allowed here."; signOut(auth); }
+  if (!ok) return;
+
+  unsubs.push(watch("beats", L => {
+    $("n").textContent = L.length;
+    $("list").innerHTML = L.map(b => `<div class="row">${b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="">` : ""}
+      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"} · ${b.exclusive ? "Members only" : "Public"} · ${b.untaggedPath ? "Has member download" : "No member download"}</small></div>
+      <button class="g" data-e="${b.id}" data-t="${esc(b.title)}" data-b="${esc(b.bpm)}" data-p="${esc(b.price)}">Edit</button>
+      <button class="g" data-x="${b.id}" data-v="${b.exclusive ? 0 : 1}">${b.exclusive ? "Make public" : "Make members only"}</button>
+      <button class="g del" data-d="${b.id}">Delete</button></div>`).join("") || none("No beats yet. Add your first one above.");
+  }));
+
+  unsubs.push(watch("orders", L => {
+    $("oc").textContent = L.filter(o => o.status === "new").length || "";
+    $("orders").innerHTML = L.map(o => `<div class="row"><div class="m"><b>${esc(o.email)}</b><small>${(o.items || []).map(i => esc(i.title) + " (" + esc(i.lic) + ")").join(", ")} · ${day(o.createdAt)}</small></div>
+      <b>$${Number(o.total).toFixed(2)}</b><span class="tag ${o.status === "new" ? "hot" : ""}">${esc(o.status)}</span>
+      <button class="g" data-os="${o.id}" data-s="${o.status === "new" ? "done" : "new"}">${o.status === "new" ? "Mark done" : "Reopen"}</button>
+      <button class="g del" data-od="${o.id}">Delete</button></div>`).join("") || none("No orders yet.");
+  }));
+
+  unsubs.push(watch("members", L => {
+    $("mc").textContent = L.filter(m => m.status === "pending").length || "";
+    $("members").innerHTML = L.map(m => `<div class="row"><div class="m"><b>${esc(m.name)}</b><small>${esc(m.email)} · joined ${day(m.createdAt)} · ${esc(m.plan)}</small></div>
+      <span class="tag ${m.status === "pending" ? "hot" : ""}">${esc(m.status)}</span><span class="tag">${m.downloadsLeft ?? 0} downloads left</span>
+      <button class="g" data-ma="${m.id}">${m.status === "active" ? "Renew" : "Activate"}</button>
+      <button class="g" data-md="${m.id}" data-n="${m.downloadsLeft ?? 0}">Set downloads</button>
+      <button class="g" data-mc="${m.id}">Cancel</button><button class="g del" data-mx="${m.id}">Delete</button></div>`).join("") || none("No artists have joined yet.");
+  }));
+
+  unsubs.push(watch("requests", L => {
+    $("rc").textContent = L.filter(r => r.status === "new").length || "";
+    $("requests").innerHTML = L.map(r => `<div class="row"><div class="m"><b>${esc(r.type)}: ${esc(r.name)}</b><small>${esc(r.email)} · ${day(r.createdAt)}</small><p style="margin-top:4px;font-weight:400">${esc(r.notes)}</p></div>
+      <span class="tag ${r.status === "new" ? "hot" : ""}">${esc(r.status)}</span>
+      <button class="g" data-rs="${r.id}" data-s="${r.status === "new" ? "done" : "new"}">${r.status === "new" ? "Mark done" : "Reopen"}</button>
+      <button class="g del" data-rd="${r.id}">Delete</button></div>`).join("") || none("No requests yet.");
+  }));
+
+  unsubs.push(onSnapshot(doc(db, "settings", "site"), s => {
+    const d = s.data() || {};
+    for (const k of ["contact", "hero", "licensing", "terms", "privacy"]) if (document.activeElement !== $("s-" + k)) $("s-" + k).value = d[k] || "";
+  }));
+});
+
+$("lf").onsubmit = async e => {
+  e.preventDefault(); $("lerr").textContent = "";
+  try { await signInWithEmailAndPassword(auth, $("em").value, $("pw").value); } catch { $("lerr").textContent = "Wrong email or password."; }
+};
+$("out").onclick = () => signOut(auth);
+$("tabs").onclick = e => { const t = e.target.closest("button")?.dataset.t; if (!t) return;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
+  ["beats", "orders", "members", "requests", "site"].forEach(x => $("t-" + x).hidden = x !== t); };
+
+$("sf").onsubmit = async e => {
+  e.preventDefault();
+  try { await setDoc(doc(db, "settings", "site"), Object.fromEntries(["contact", "hero", "licensing", "terms", "privacy"].map(k => [k, $("s-" + k).value.trim()]))); $("smsg").textContent = "Saved. The site is updated."; $("smsg").className = ""; }
+  catch (err) { $("smsg").textContent = "Failed: " + err.message; $("smsg").className = "err"; }
+};
+
+const duration = src => new Promise(r => { const a = new Audio(); a.preload = "metadata"; a.src = src; a.onloadedmetadata = () => r(Math.round(a.duration)); a.onerror = () => r(0); });
+async function upload(folder, f, label) {
+  const task = uploadBytesResumable(ref(st, `${folder}/${Date.now()}_${f.name.replace(/[^\w.-]/g, "_")}`), f);
+  await new Promise((res, rej) => task.on("state_changed", s => say(`Uploading ${label} ${Math.round(s.bytesTransferred / s.totalBytes * 100)}%`), rej, res));
+  return task.snapshot.ref;
+}
+
+$("af").onsubmit = async e => {
+  e.preventDefault();
+  const f = $("file").files[0], link = $("url").value.trim(), c = $("cover").files[0], u = $("untag").files[0];
+  if (!f && !link) return say("Choose a preview audio file or paste a link.", true);
+  $("add").disabled = true;
+  try {
+    let audioUrl = link, dur;
+    if (f) { dur = await duration(URL.createObjectURL(f)); audioUrl = await getDownloadURL(await upload("beats", f, "preview")); } else dur = await duration(link);
+    const coverUrl = c ? await getDownloadURL(await upload("covers", c, "cover")) : "";
+    const untaggedPath = u ? (await upload("untagged", u, "member file")).fullPath : "";
+    await addDoc(collection(db, "beats"), { title: $("title").value.trim(), bpm: +$("bpm").value || 0, tags: $("tags").value.trim() || "Dancehall",
+      price: $("price").value || "", audioUrl, coverUrl, untaggedPath, exclusive: $("excl").checked, duration: dur, createdAt: serverTimestamp() });
+    $("af").reset(); say("Published. It is live on the site.");
+  } catch (err) { say("Failed: " + err.message, true); }
+  $("add").disabled = false;
+};
+
+document.addEventListener("click", async e => {
+  const d = e.target.dataset; if (!e.target.closest("button")) return;
+  try {
+    if (d.d && confirm("Delete this beat?")) await deleteDoc(doc(db, "beats", d.d));
+    if (d.x) await updateDoc(doc(db, "beats", d.x), { exclusive: d.v === "1" });
+    if (d.e) {
+      const title = prompt("Title", d.t); if (title === null) return;
+      const bpm = prompt("BPM", d.b); if (bpm === null) return;
+      const price = prompt("MP3 lease price in USD (blank = $60)", d.p); if (price === null) return;
+      await updateDoc(doc(db, "beats", d.e), { title: title.trim() || d.t, bpm: +bpm || 0, price: price.trim() });
+    }
+    if (d.os) await updateDoc(doc(db, "orders", d.os), { status: d.s });
+    if (d.od && confirm("Delete this order?")) await deleteDoc(doc(db, "orders", d.od));
+    if (d.rs) await updateDoc(doc(db, "requests", d.rs), { status: d.s });
+    if (d.rd && confirm("Delete this request?")) await deleteDoc(doc(db, "requests", d.rd));
+    if (d.ma) await updateDoc(doc(db, "members", d.ma), { status: "active", downloadsLeft: 10 });
+    if (d.mc && confirm("Cancel this membership?")) await updateDoc(doc(db, "members", d.mc), { status: "cancelled", downloadsLeft: 0 });
+    if (d.md) { const n = prompt("Downloads left", d.n); if (n !== null && !isNaN(+n)) await updateDoc(doc(db, "members", d.md), { downloadsLeft: Math.max(0, Math.floor(+n)) }); }
+    if (d.mx && confirm("Delete this artist record?")) await deleteDoc(doc(db, "members", d.mx));
+  } catch (err) { alert("Failed: " + err.message); }
+});
+</script>
+</body>
+</html>

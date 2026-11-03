@@ -22,7 +22,7 @@ nav a{color:var(--txt);text-decoration:none;font-size:15px}
 nav a:hover{color:var(--gold)}
 #cartBtn{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--gold);font-weight:700}
 svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.hero{min-height:62vh;display:grid;align-items:end;padding:64px 20px 40px;background:linear-gradient(180deg,rgba(10,10,10,.35),var(--bg)),linear-gradient(90deg,rgba(125,0,0,.75),rgba(10,10,10,.2)),url("https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1800&q=70") center/cover,var(--red2)}
+.hero{min-height:62vh;display:grid;align-items:end;padding:64px 20px 40px;background:linear-gradient(180deg,rgba(10,10,10,.35),var(--bg)),linear-gradient(90deg,rgba(125,0,0,.75),rgba(10,10,10,.2)),var(--hero,url("https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1800&q=70")) center/cover,var(--red2)}
 .hero div{max-width:1100px;margin:auto;width:100%}
 .hero h1{font:400 clamp(26px,6vw,58px)/1.12 Michroma,sans-serif;color:var(--gold);max-width:16em}
 .hero p{margin:14px 0 24px;max-width:46ch;font-size:18px}
@@ -73,10 +73,17 @@ dialog input{width:100%;background:#0a0606;border:1px solid var(--line);color:va
 #toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:20px;font-weight:700;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
 @media(max-width:760px){
- header{gap:8px 14px;padding:8px 14px}nav{order:3;width:100%;margin:0;justify-content:space-around;gap:10px}#cartBtn{margin-left:auto}
+ header{gap:8px 14px;padding:8px 14px}nav{order:3;width:100%;margin:0;justify-content:space-around;gap:10px}#acctBtn{margin-left:auto}
  .row{grid-template-columns:52px minmax(0,1fr) 34px 34px auto;gap:8px}.row>.c,.row>.tg,.row.h{display:none}.info small{display:block}.buy{padding:9px 10px}
  .hero{min-height:52vh}#bar span{display:none}#bar{padding:10px 14px}
 }
+.lg{background:none;border:1px solid var(--line);color:var(--txt);border-radius:20px;padding:6px 14px}
+.lg:hover{border-color:var(--gold);color:var(--gold)}
+.mb{font:600 11px Barlow;font-style:normal;background:var(--red);color:var(--gold);border-radius:10px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var(--line);color:var(--txt);padding:11px;border-radius:6px;font:inherit;margin:10px 0}
+.err{color:#ff6b6b}.note{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin:12px 0}
+.g{background:none;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:8px 14px}
+.legal{white-space:pre-wrap}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
@@ -84,6 +91,7 @@ dialog input{width:100%;background:#0a0606;border:1px solid var(--line);color:va
 <header>
   <a class="logo" href="#top"><i>Y</i>YANASTAN</a>
   <nav><a href="#beats">Beats</a><a href="#memberships">Memberships</a><a href="#contact">Contact</a></nav>
+  <button class="lg" id="acctBtn">Log in</button>
   <button id="cartBtn" aria-label="Open cart"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/></svg><span id="ct">$0.00</span></button>
 </header>
 
@@ -120,7 +128,7 @@ dialog input{width:100%;background:#0a0606;border:1px solid var(--line);color:va
 <footer>
   <div><b style="color:var(--gold);font:400 15px Michroma">YANASTAN</b><p>Yanastan Entertainment</p></div>
   <div><a href="#top">Home</a><a href="#beats">Beats</a><a href="#memberships">Memberships</a><a href="#contact">Contact</a></div>
-  <div><a href="#" data-lic>Licensing info</a><a href="#">Terms of use</a><a href="#">Privacy policy</a></div>
+  <div><a href="#" data-info="licensing">Licensing info</a><a href="#" data-info="terms">Terms of use</a><a href="#" data-info="privacy">Privacy policy</a></div>
 </footer>
 
 <div id="bar" hidden>
@@ -130,13 +138,18 @@ dialog input{width:100%;background:#0a0606;border:1px solid var(--line);color:va
 
 <dialog id="dLic"></dialog>
 <dialog id="dSmp"><div class="dh"><h3 id="smT">Sample download</h3><button class="x" data-x aria-label="Close">×</button></div>
-  <p>Free downloads are available on select membership plans.</p><br><a class="btn" href="#memberships" data-x>Compare membership plans</a></dialog>
+  <div id="smB"></div></dialog>
 <dialog id="dCart" class="side"></dialog>
+<dialog id="dAuth"></dialog>
+<dialog id="dAcct"></dialog>
+<dialog id="dInfo"></dialog>
 <div id="toast" role="status"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, collection, query, where, onSnapshot, addDoc, setDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
 const CONTACT = "info@yanastan.com"; // change to the producer's email
 const LIC = [["MP3 Lease","MP3 file",0],["Stems","MP3, stems and WAV",139.99],["Remake this beat (Exclusive)","MP3, stems and WAV",220],["Unlimited Stems","MP3, stems and WAV",300]];
@@ -148,7 +161,7 @@ const app = initializeApp({
   messagingSenderId: "188003047512",
   appId: "1:188003047512:web:dde20ba8b146b11df9922d"
 });
-const db = getFirestore(app);
+const db = getFirestore(app), auth = getAuth(app), st = getStorage(app);
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = s => isFinite(s) && s ? Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0") : "0:00";
@@ -157,13 +170,36 @@ const IC = {dl:'<svg viewBox="0 0 24 24"><path d="M12 4v12m0 0l-5-5m5 5l5-5M5 20
 const audio = new Audio(); audio.preload = "none";
 let beats = [], shown = [], cur = null, tag = "All", cart = [];
 try { cart = JSON.parse(localStorage.getItem("yc") || "[]"); } catch {}
-$("mail").textContent = CONTACT; $("mail").href = "mailto:" + CONTACT;
+const DEF = { contact: CONTACT, hero: "",
+  licensing: "MP3 Lease: MP3 file for one project.\nStems: MP3, stems and WAV for mixing.\nRemake this beat (Exclusive): MP3, stems and WAV, with exclusive rights.\nUnlimited Stems: MP3, stems and WAV with unlimited use.\n\nFiles are delivered by email after payment is confirmed. Contact us for the full contract.",
+  terms: "By using this site and buying a license you agree to these terms. Licenses are granted after payment is received. Beats may not be resold or redistributed as instrumentals. Memberships give access to member features while the membership is active. Contact us with any question.",
+  privacy: "We collect your email, and your artist name if you join, to run your account, orders and requests. We do not sell your data. Data is stored with Google Firebase. Contact us to have your data removed." };
+let site = DEF, member = null, unsubB = null, unsubM = null, wasM, hitDone = false, authMode = "in", wantJoin = false;
+const isM = () => member && member.status === "active";
+function applySite() { $("mail").textContent = site.contact; $("mail").href = "mailto:" + site.contact;
+  if (site.hero) document.documentElement.style.setProperty("--hero", `url("${site.hero.replace(/["\\]/g, "")}")`); }
+applySite();
+onSnapshot(doc(db, "settings", "site"), s => { site = { ...DEF }; const d = s.data() || {}; for (const k in d) if (d[k]) site[k] = d[k]; applySite(); }, () => {});
 const toast = t => { const e = $("toast"); e.textContent = t; e.className = "on"; setTimeout(() => e.className = "", 2200); };
 
-onSnapshot(query(collection(db, "beats"), orderBy("createdAt", "desc")), snap => {
-  beats = snap.docs.map(d => ({ id: d.id, ...d.data() })); chips(); render();
-  const h = location.hash.slice(1), el = h && $(h); if (el && el.classList.contains("row")) { el.classList.add("hit"); el.scrollIntoView({block:"center"}); }
-}, () => $("list").innerHTML = '<p class="empty">Could not load beats. Check your connection and refresh.</p>');
+function watchBeats() {
+  if (unsubB) unsubB();
+  const col = collection(db, "beats");
+  unsubB = onSnapshot(isM() ? col : query(col, where("exclusive", "==", false)), snap => {
+    beats = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    chips(); render();
+    const h = location.hash.slice(1), el = h && $(h); if (!hitDone && el && el.classList.contains("row")) { hitDone = true; el.classList.add("hit"); el.scrollIntoView({ block: "center" }); }
+  }, () => $("list").innerHTML = '<p class="empty">Could not load beats. Check your connection and refresh.</p>');
+}
+onAuthStateChanged(auth, u => {
+  member = null; if (unsubM) unsubM(); $("acctBtn").textContent = u ? "Account" : "Log in";
+  if (!u) { wasM = undefined; if ($("dAcct").open) $("dAcct").close(); return watchBeats(); }
+  unsubM = onSnapshot(doc(db, "members", u.uid), s => {
+    member = s.exists() ? s.data() : null;
+    if (isM() !== wasM) { wasM = isM(); watchBeats(); } else render();
+    if ($("dAcct").open) openAcct();
+  }, () => watchBeats());
+});
 
 function chips() {
   const t = ["All", ...new Set(beats.flatMap(b => (b.tags || "").split(",").map(x => x.trim()).filter(Boolean)))];
@@ -179,7 +215,7 @@ function render() {
   $("list").innerHTML = shown.length ? shown.map((b, i) => `
   <div class="row${cur === b.id ? " cur" : ""}" id="${esc(b.id)}">
     <button class="cv" data-p="${i}" aria-label="Play ${esc(b.title)}" ${b.coverUrl ? `style="background-image:url('${esc(b.coverUrl)}')"` : ""}>${b.coverUrl ? "" : "Y"}<b>${cur === b.id && !audio.paused ? "❚❚" : "▶"}</b></button>
-    <div class="info"><span class="t">${esc(b.title)}</span><small>${esc(b.bpm || "-")} BPM · ${esc(b.tags)}</small></div>
+    <div class="info"><span class="t">${esc(b.title)}${b.exclusive ? '<em class="mb">Members</em>' : ""}</span><small>${esc(b.bpm || "-")} BPM · ${esc(b.tags)}</small></div>
     <span class="c">${fmt(b.duration)}</span><span class="c">${esc(b.bpm || "-")}</span><span class="tg">${esc(b.tags)}</span>
     <button class="ic" data-d="${i}" aria-label="Download sample of ${esc(b.title)}">${IC.dl}</button>
     <button class="ic" data-s="${i}" aria-label="Share ${esc(b.title)}">${IC.sh}</button>
@@ -190,7 +226,11 @@ function render() {
 $("list").onclick = e => {
   const t = e.target.closest("button"); if (!t) return; const d = t.dataset;
   if (d.p) play(shown[+d.p]);
-  if (d.d) { $("smT").textContent = "Sample download: " + shown[+d.d].title; $("dSmp").showModal(); }
+  if (d.d) { const b = shown[+d.d];
+    if (isM() && b.untaggedPath) return memberDl(b);
+    $("smT").textContent = "Sample download: " + b.title;
+    $("smB").innerHTML = isM() ? "<p>This beat has no free download. You can still license it.</p>" : '<p>Free downloads are available to Artist members.</p><br><a class="btn" href="#memberships" data-x>Compare membership plans</a>';
+    $("dSmp").showModal(); }
   if (d.s) share(shown[+d.s]);
   if (d.b) openLic(shown[+d.b]);
 };
@@ -222,7 +262,62 @@ function openCart(msg) {
   if (!$("dCart").open) $("dCart").showModal();
 }
 $("cartBtn").onclick = () => openCart();
-$("join").onclick = () => { add({ id: "membership", title: "Artist membership", lic: "Monthly", price: 35 }); openCart(); };
+$("join").onclick = () => { if (auth.currentUser) openAcct(); else { wantJoin = true; openAuth("up", "Create an account to join the Artist plan."); } };
+$("acctBtn").onclick = () => auth.currentUser ? openAcct() : openAuth("in");
+
+async function memberDl(b) {
+  if (member.downloadsLeft < 1) return toast("No downloads left. Contact the producer to renew.");
+  try {
+    const url = await getDownloadURL(ref(st, b.untaggedPath));
+    await updateDoc(doc(db, "members", auth.currentUser.uid), { downloadsLeft: member.downloadsLeft - 1 });
+    const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; a.click(); toast("Download started");
+  } catch { toast("Download failed. Try again."); }
+}
+
+function openAuth(mode, note) {
+  authMode = mode; const up = mode === "up";
+  $("dAuth").innerHTML = `<div class="dh"><h3>${up ? "Create account" : "Log in"}</h3><button class="x" data-x aria-label="Close">×</button></div>${note ? `<p>${note}</p>` : ""}
+    <input id="ae" type="email" placeholder="Email" autocomplete="email" aria-label="Email"><input id="ap" type="password" placeholder="Password" autocomplete="${up ? "new-password" : "current-password"}" aria-label="Password">
+    <p id="ar" class="err" role="alert"></p><button class="btn" style="width:100%" data-go>${up ? "Create account" : "Log in"}</button>
+    <p style="margin-top:14px;font-size:14px"><a href="#" data-sw>${up ? "I already have an account" : "Create an account"}</a>${up ? "" : ' · <a href="#" data-fg>Forgot password?</a>'}</p>`;
+  if (!$("dAuth").open) $("dAuth").showModal();
+}
+$("dAuth").onclick = async e => {
+  const d = e.target.dataset, r = $("ar");
+  if (d.sw !== undefined) { e.preventDefault(); openAuth(authMode === "up" ? "in" : "up"); }
+  if (d.fg !== undefined) { e.preventDefault(); const m = $("ae").value.trim(); r.className = "err";
+    if (!m) return r.textContent = "Enter your email first.";
+    try { await sendPasswordResetEmail(auth, m); r.className = ""; r.textContent = "Reset link sent. Check your email."; } catch { r.textContent = "Could not send the reset link."; } }
+  if (d.go !== undefined) {
+    const em = $("ae").value.trim(), pw = $("ap").value; r.className = "err";
+    if (!em || !pw) return r.textContent = "Enter your email and password.";
+    try {
+      authMode === "up" ? await createUserWithEmailAndPassword(auth, em, pw) : await signInWithEmailAndPassword(auth, em, pw);
+      $("dAuth").close(); toast(authMode === "up" ? "Account created" : "Welcome back");
+      if (wantJoin) { wantJoin = false; openAcct(); }
+    } catch (err) { r.textContent = ({ "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account. Log in instead.", "auth/weak-password": "Use a password with at least 6 characters.", "auth/invalid-email": "Enter a valid email." })[err.code] || "Something went wrong. Try again."; }
+  }
+};
+
+function openAcct() {
+  const u = auth.currentUser; if (!u) return openAuth("in");
+  const m = member;
+  let h = `<div class="dh"><h3>My account</h3><button class="x" data-x aria-label="Close">×</button></div><p>${esc(u.email)}</p>`;
+  if (!m) h += '<div class="note"><b>Artist plan: $35 per month</b><br>Request membership and the producer will contact you to arrange payment and activate it.</div><input id="mn" placeholder="Artist name" autocomplete="name" aria-label="Artist name"><button class="btn" data-j>Request membership</button>';
+  else if (m.status === "pending") h += '<div class="note">Your membership request is pending. The producer will contact you to arrange payment.</div>';
+  else if (m.status === "active") h += `<div class="note"><b>Artist member</b><br>${m.downloadsLeft} untagged downloads left. Use the download button on any beat.</div><h3 style="margin-top:16px;font-size:17px">Request a custom beat or mix and master</h3><select id="rt" aria-label="Request type"><option>Custom beat</option><option>Mix and master</option></select><textarea id="rn" rows="4" maxlength="1000" placeholder="Tell us what you need" aria-label="Request details"></textarea><button class="btn" data-q>Send request</button>`;
+  else h += `<div class="note">Your membership is ${esc(m.status)}. Contact the producer to rejoin.</div>`;
+  $("dAcct").innerHTML = h + '<br><button class="g" style="margin-top:14px" data-lo>Log out</button>';
+  if (!$("dAcct").open) $("dAcct").showModal();
+}
+$("dAcct").onclick = async e => {
+  const d = e.target.dataset, u = auth.currentUser;
+  if (d.lo !== undefined) { await signOut(auth); $("dAcct").close(); toast("Logged out"); }
+  if (d.j !== undefined) { const n = $("mn").value.trim(); if (!n) return toast("Enter your artist name");
+    try { await setDoc(doc(db, "members", u.uid), { email: u.email, name: n.slice(0, 80), plan: "Artist", status: "pending", downloadsLeft: 0, createdAt: serverTimestamp() }); toast("Request sent"); } catch { toast("Could not send. Try again."); } }
+  if (d.q !== undefined) { const n = $("rn").value.trim(); if (!n) return toast("Describe what you need");
+    try { await addDoc(collection(db, "requests"), { uid: u.uid, email: u.email, name: member.name, type: $("rt").value, notes: n, status: "new", createdAt: serverTimestamp() }); $("rn").value = ""; toast("Request sent to the producer"); } catch { toast("Could not send. Try again."); } }
+};
 $("dCart").onclick = async e => {
   const d = e.target.dataset;
   if (d.r) { cart.splice(+d.r, 1); saveCart(); openCart(); }
@@ -235,7 +330,8 @@ $("dCart").onclick = async e => {
   }
 };
 document.addEventListener("click", e => { const x = e.target; if (x.matches("[data-x]")) x.closest("dialog").close(); else if (x.tagName === "DIALOG") x.close();
-  if (x.matches("[data-lic]")) { e.preventDefault(); toast("Licensing info coming soon"); } });
+  if (x.dataset && x.dataset.info) { e.preventDefault(); const k = x.dataset.info;
+    $("dInfo").innerHTML = `<div class="dh"><h3>${x.textContent}</h3><button class="x" data-x aria-label="Close">×</button></div><p class="legal">${esc(site[k])}</p>`; $("dInfo").showModal(); } });
 saveCart();
 
 function play(b) {
