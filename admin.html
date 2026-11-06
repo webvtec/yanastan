@@ -59,7 +59,8 @@ button:disabled{opacity:.5}
           <label>BPM<input id="bpm" type="number" min="40" max="220"></label>
           <label>Tags (comma separated)<input id="tags" placeholder="Dancehall, type beat"></label>
           <label>MP3 lease price in USD (blank = $60)<input id="price" type="number" min="0" step="0.01"></label>
-          <label class="full">Preview audio (plays on the site for everyone)<input id="file" type="file" accept="audio/*"></label>
+          <label class="full">Preview audio (the one visitors hear on the site)<input id="file" type="file" accept="audio/*"></label>
+          <label class="full">Full audio file to sell (private, this is what customers pay for, never played on the site)<input id="paid" type="file" accept="audio/*"></label>
           <label class="full">Cover image (optional)<input id="cover" type="file" accept="image/*"></label>
           <div class="full"><button id="add">Publish beat</button></div>
           <p class="full" id="msg"></p>
@@ -110,7 +111,7 @@ onAuthStateChanged(auth, u => {
   unsubs.push(watch("beats", L => {
     $("n").textContent = L.length;
     $("list").innerHTML = L.map(b => `<div class="row">${b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="">` : ""}
-      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"}</small></div>
+      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"} · ${b.untaggedPath ? "Paid file uploaded" : "No paid file yet"}</small></div>
       <button class="g" data-e="${b.id}" data-t="${esc(b.title)}" data-b="${esc(b.bpm)}" data-p="${esc(b.price)}">Edit</button>
       <button class="g del" data-d="${b.id}">Delete</button></div>`).join("") || none("No beats yet. Add your first one above.");
   }));
@@ -157,15 +158,16 @@ async function upload(folder, f, label) {
 
 $("af").onsubmit = async e => {
   e.preventDefault();
-  const f = $("file").files[0], c = $("cover").files[0];
+  const f = $("file").files[0], c = $("cover").files[0], p = $("paid").files[0];
   if (!f) return say("Choose a preview audio file.", true);
   $("add").disabled = true;
   try {
     const dur = await duration(URL.createObjectURL(f));
     const audioUrl = await getDownloadURL(await upload("beats", f, "preview"));
+    const untaggedPath = p ? (await upload("untagged", p, "paid file")).fullPath : "";
     const coverUrl = c ? await getDownloadURL(await upload("covers", c, "cover")) : "";
     await addDoc(collection(db, "beats"), { title: $("title").value.trim(), bpm: +$("bpm").value || 0, tags: $("tags").value.trim() || "Dancehall",
-      price: $("price").value || "", audioUrl, coverUrl, exclusive: false, duration: dur, createdAt: serverTimestamp() });
+      price: $("price").value || "", audioUrl, coverUrl, untaggedPath, exclusive: false, duration: dur, createdAt: serverTimestamp() });
     $("af").reset(); say("Published. It is live on the site.");
   } catch (err) { say("Failed: " + err.message, true); }
   $("add").disabled = false;
