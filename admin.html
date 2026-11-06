@@ -7,45 +7,71 @@
 <title>Yanastan Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--red:#a80000;--gold:#c9a45c;--bg:#0a0a0a;--panel:#141010;--line:#2a1f1f;--txt:#efe6d2;--mute:#9a8f7c}
+:root{--red:#a80000;--red2:#7d0000;--gold:#c9a45c;--bg:#0a0a0a;--panel:#141010;--panel2:#1a1313;--line:#2a1f1f;--txt:#efe6d2;--mute:#9a8f7c;--ok:#6fbf8a}
 *{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--txt);font:500 16px/1.4 Barlow,system-ui,sans-serif}
+body{background:radial-gradient(900px 380px at 85% -120px,rgba(168,0,0,.22),transparent),var(--bg);color:var(--txt);font:500 16px/1.45 Barlow,system-ui,sans-serif;min-height:100vh}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--line)}
-h1{font:400 15px Michroma,sans-serif;color:var(--gold)}
-h2{font:400 15px Michroma,sans-serif;color:var(--gold);margin-bottom:14px}
-.wrap{max-width:1000px;margin:auto;padding:20px}
-.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px}
-.tabs button{background:none;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
-.tabs button.on{background:var(--red);border-color:var(--red);color:var(--gold)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:20px}
-form,.grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}.full{grid-column:1/-1}
-label{display:grid;gap:4px;color:var(--mute);font-size:14px}
-label.ck{display:flex;align-items:center;gap:10px;color:var(--txt)}label.ck input{width:auto}
-input,textarea{background:#0a0606;border:1px solid var(--line);color:var(--txt);padding:10px;border-radius:6px;font:inherit;width:100%}
-button{background:var(--red);color:var(--gold);border:0;padding:10px 18px;border-radius:6px;cursor:pointer;font:inherit;font-weight:600}
-button.g{background:none;border:1px solid var(--line);color:var(--mute);padding:6px 12px}
-button.del:hover{border-color:var(--red);color:#ff6b6b}
-button:disabled{opacity:.5}
-#login{max-width:380px;margin:80px auto;padding:0 20px}#login form{grid-template-columns:1fr}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
-.row .m{flex:1;min-width:160px;overflow-wrap:anywhere}.row small{display:block;color:var(--mute);font-weight:400}
-.row img{width:44px;height:44px;border-radius:6px;object-fit:cover}
-.tag{font-size:13px;color:var(--mute)}.hot{color:var(--gold)}
-#msg,#smsg{min-height:20px;color:var(--gold);font-size:14px}.err{color:#ff6b6b!important}
-.empty{color:var(--mute)}
-@media(max-width:640px){form,.grid{grid-template-columns:1fr}}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 24px;background:rgba(10,10,10,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand i{width:36px;height:36px;border-radius:50%;background:var(--red);display:grid;place-items:center;font:normal 18px Michroma,sans-serif;color:var(--gold)}
+.brand span{display:block;color:var(--mute);font-size:13px;font-weight:500}
+h1{font:400 15px Michroma,sans-serif;color:var(--gold);letter-spacing:.04em}
+h2{font:400 15px Michroma,sans-serif;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+h2 .ct{font:600 13px Barlow,sans-serif;color:var(--mute);background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:1px 10px}
+.hd-r{display:flex;align-items:center;gap:10px}
+.wrap{max-width:1000px;margin:auto;padding:28px 20px 60px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:5px;margin-bottom:24px;background:var(--panel);border:1px solid var(--line);border-radius:12px;width:fit-content;max-width:100%}
+.tabs button{background:none;border:0;color:var(--mute);white-space:nowrap;padding:9px 18px;border-radius:8px;display:flex;align-items:center;gap:8px;transition:background .15s,color .15s}
+.tabs button:hover{color:var(--txt)}
+.tabs button.on{background:var(--red);color:var(--gold)}
+.tabs span:not(:empty){background:var(--gold);color:#000;font-size:12px;font-weight:700;border-radius:20px;padding:0 7px;line-height:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:24px}
+form,.grid{display:grid;gap:16px;grid-template-columns:repeat(2,1fr)}.full{grid-column:1/-1}
+label{display:grid;gap:6px;color:var(--mute);font-size:14px;font-weight:600}
+input,textarea{background:#0a0606;border:1px solid var(--line);color:var(--txt);padding:11px 12px;border-radius:8px;font:inherit;font-weight:500;width:100%;transition:border-color .15s}
+input:hover,textarea:hover{border-color:#4a3636}
+input:focus{border-color:var(--gold);outline:0;box-shadow:0 0 0 3px rgba(201,164,92,.18)}
+input[type=file]{padding:18px;border-style:dashed;color:var(--mute);cursor:pointer;background:var(--panel2)}
+input[type=file]::file-selector-button{background:var(--red);color:var(--gold);border:0;border-radius:6px;padding:7px 14px;margin-right:12px;font:inherit;font-weight:600;cursor:pointer}
+.hint{font-weight:400;font-size:13px;color:var(--mute)}
+button{background:var(--red);color:var(--gold);border:0;padding:11px 22px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600;transition:background .15s,border-color .15s,color .15s}
+button:hover{background:#c00000}
+button.g{background:none;border:1px solid var(--line);color:var(--mute);padding:6px 14px;font-size:14px}
+button.g:hover{border-color:var(--gold);color:var(--gold);background:none}
+button.del:hover{border-color:#ff6b6b;color:#ff6b6b}
+button:disabled{opacity:.5;cursor:wait}
+#login{max-width:380px;margin:12vh auto;padding:32px;background:var(--panel);border:1px solid var(--line);border-radius:14px;text-align:center}
+#login .brand{justify-content:center;margin-bottom:6px}
+#login p.sub{color:var(--mute);margin:0 0 24px;font-size:15px}
+#login button{width:100%;padding:13px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px 12px;margin:0 -12px;border-bottom:1px solid var(--line);border-radius:10px;transition:background .15s}
+.row:last-child{border-bottom:0}.row:hover{background:var(--panel2)}
+.row .m{flex:1;min-width:180px;overflow-wrap:anywhere}.row .m b{font-weight:600}
+.row small{display:block;color:var(--mute);font-weight:400;font-size:14px;margin-top:2px}
+.row img,.ph{width:48px;height:48px;border-radius:8px;object-fit:cover;flex:none}
+.ph{background:linear-gradient(135deg,var(--red2),#2a0505);display:grid;place-items:center;color:var(--gold);font:16px Michroma,sans-serif}
+.amt{font-weight:700;color:var(--gold);font-size:17px}
+.tag{font-size:12px;font-weight:700;letter-spacing:.03em;padding:3px 11px;border-radius:20px;border:1px solid var(--line);color:var(--ok);text-transform:capitalize}
+.tag.hot{color:#000;background:var(--gold);border-color:var(--gold)}
+.pill{display:inline-block;font-size:12px;padding:1px 9px;border-radius:20px;border:1px solid var(--line);margin-left:6px;color:var(--mute)}.pill.ok{color:var(--ok);border-color:rgba(111,191,138,.35)}.pill.no{color:#ff9a6b;border-color:rgba(255,154,107,.35)}
+#msg{min-height:20px;color:var(--gold);font-size:14px}.err{color:#ff6b6b!important}
+.empty{color:var(--mute);text-align:center;padding:28px 0}
+@media(max-width:640px){form,.grid{grid-template-columns:1fr}header{padding:12px 16px}.card{padding:18px}.tabs{width:100%}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+
 </head>
 <body>
 <section id="login" hidden>
-  <h1 style="margin-bottom:20px">Yanastan Admin</h1>
-  <button id="gbtn" style="width:100%">Sign in with Google</button>
-  <p id="lerr" class="err" role="alert" style="margin-top:12px"></p>
+  <div class="brand"><i>Y</i><h1>Yanastan Admin</h1></div>
+  <p class="sub">Sign in to manage beats, orders and requests.</p>
+  <button id="gbtn">Sign in with Google</button>
+  <p id="lerr" class="err" role="alert" style="margin-top:14px"></p>
 </section>
 
 <section id="app" hidden>
-  <header><h1>Yanastan Dashboard</h1><div><a href="index.html" style="color:var(--gold);margin-right:14px">View site</a><button class="g" id="out">Sign out</button></div></header>
+  <header><div class="brand"><i>Y</i><div><h1>Yanastan</h1><span>Dashboard</span></div></div><div class="hd-r"><a href="index.html">View site</a><button class="g" id="out">Sign out</button></div></header>
   <div class="wrap">
     <div class="tabs" id="tabs">
       <button data-t="beats" class="on">Beats</button><button data-t="orders">Orders <span id="oc"></span></button>
@@ -57,16 +83,16 @@ button:disabled{opacity:.5}
         <form id="af">
           <label>Title<input id="title" required></label>
           <label>BPM<input id="bpm" type="number" min="40" max="220"></label>
-          <label>Tags (comma separated)<input id="tags" placeholder="Dancehall, type beat"></label>
-          <label>MP3 lease price in USD (blank = $60)<input id="price" type="number" min="0" step="0.01"></label>
-          <label class="full">Preview audio (the one visitors hear on the site)<input id="file" type="file" accept="audio/*"></label>
-          <label class="full">Full audio file to sell (private, this is what customers pay for, never played on the site)<input id="paid" type="file" accept="audio/*"></label>
-          <label class="full">Cover image (optional)<input id="cover" type="file" accept="image/*"></label>
+          <label>Tags <span class="hint">Separate with commas</span><input id="tags" placeholder="Dancehall, type beat"></label>
+          <label>MP3 lease price (USD) <span class="hint">Leave blank for $60</span><input id="price" type="number" min="0" step="0.01"></label>
+          <label class="full">Preview audio <span class="hint">The clip visitors hear on the site</span><input id="file" type="file" accept="audio/*"></label>
+          <label class="full">Full audio file to sell <span class="hint">Private. This is what customers pay for and it is never played on the site</span><input id="paid" type="file" accept="audio/*"></label>
+          <label class="full">Cover image <span class="hint">Optional</span><input id="cover" type="file" accept="image/*"></label>
           <div class="full"><button id="add">Publish beat</button></div>
           <p class="full" id="msg"></p>
         </form>
       </div>
-      <div class="card"><h2>All beats (<span id="n">0</span>)</h2><div id="list"></div></div>
+      <div class="card"><h2>All beats <span class="ct" id="n">0</span></h2><div id="list"></div></div>
     </div>
 
     <div id="t-orders" hidden><div class="card"><h2>Orders</h2><div id="orders"></div></div></div>
@@ -110,8 +136,8 @@ onAuthStateChanged(auth, u => {
 
   unsubs.push(watch("beats", L => {
     $("n").textContent = L.length;
-    $("list").innerHTML = L.map(b => `<div class="row">${b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="">` : ""}
-      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"} · ${b.untaggedPath ? "Paid file uploaded" : "No paid file yet"}</small></div>
+    $("list").innerHTML = L.map(b => `<div class="row">${b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="">` : `<div class="ph">♪</div>`}
+      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"}<span class="pill ${b.untaggedPath ? "ok" : "no"}">${b.untaggedPath ? "Paid file uploaded" : "No paid file yet"}</span></small></div>
       <button class="g" data-e="${b.id}" data-t="${esc(b.title)}" data-b="${esc(b.bpm)}" data-p="${esc(b.price)}">Edit</button>
       <button class="g del" data-d="${b.id}">Delete</button></div>`).join("") || none("No beats yet. Add your first one above.");
   }));
@@ -119,7 +145,7 @@ onAuthStateChanged(auth, u => {
   unsubs.push(watch("orders", L => {
     $("oc").textContent = L.filter(o => o.status === "new").length || "";
     $("orders").innerHTML = L.map(o => `<div class="row"><div class="m"><b>${esc(o.email)}</b><small>${(o.items || []).map(i => esc(i.title) + " (" + esc(i.lic) + ")").join(", ")} · ${day(o.createdAt)}</small></div>
-      <b>$${Number(o.total).toFixed(2)}</b><span class="tag ${o.status === "new" ? "hot" : ""}">${esc(o.status)}</span>
+      <b class="amt">$${Number(o.total).toFixed(2)}</b><span class="tag ${o.status === "new" ? "hot" : ""}">${esc(o.status)}</span>
       <button class="g" data-os="${o.id}" data-s="${o.status === "new" ? "done" : "new"}">${o.status === "new" ? "Mark done" : "Reopen"}</button>
       <button class="g del" data-od="${o.id}">Delete</button></div>`).join("") || none("No orders yet.");
   }));
