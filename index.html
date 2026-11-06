@@ -89,7 +89,7 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 <header>
   <a class="logo" href="#top"><i>Y</i>YANASTAN</a>
   <nav><a href="#beats">Beats</a><a href="#licensing">Licensing</a><a href="#contact">Contact</a></nav>
-  <a class="adm" href="admin.html">Admin</a>
+  <a class="adm" href="dashboard.html">Admin</a>
   <button id="cartBtn" aria-label="Open cart"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/></svg><span id="ct">$0.00</span></button>
 </header>
 
@@ -146,7 +146,8 @@ import { getFirestore, collection, query, where, onSnapshot, addDoc, doc, server
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const CONTACT = "info@yanastan.com"; // change to the producer's email
-const ADMIN_EMAILS = []; // Google emails allowed into admin, e.g. ["you@gmail.com"]. Empty = any Google account.
+const ADMIN_UIDS = []; // Firebase UIDs allowed into the dashboard, e.g. ["abc123..."]
+const ADMIN_EMAILS = []; // optional: Google emails allowed too. If both lists are empty, any Google account gets through.
 // [name, files included, price]. A null price means "make an offer".
 const LIC = [["MP3 & WAV","MP3 and WAV files",40],["Unlimited Stems","MP3, WAV and stems, unlimited use",200],["Exclusive","MP3, WAV and stems with exclusive rights",null]];
 const app = initializeApp({
@@ -280,10 +281,10 @@ function openCart(msg) {
 $("cartBtn").onclick = () => openCart();
 document.querySelector(".adm").onclick = async e => {
   e.preventDefault();
-  const ok = u => u && (!ADMIN_EMAILS.length || ADMIN_EMAILS.map(x => x.toLowerCase()).includes((u.email || "").toLowerCase()));
+  const ok = u => u && (!ADMIN_UIDS.length && !ADMIN_EMAILS.length || ADMIN_UIDS.includes(u.uid) || ADMIN_EMAILS.map(x => x.toLowerCase()).includes((u.email || "").toLowerCase()));
   try {
     const u = auth.currentUser || (await signInWithPopup(auth, new GoogleAuthProvider())).user;
-    if (ok(u)) location.href = "admin.html";
+    if (ok(u)) location.href = "dashboard.html";
     else { await signOut(auth); toast("That Google account is not an admin"); }
   } catch (err) {
     if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") return;
