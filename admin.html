@@ -40,11 +40,8 @@ button:disabled{opacity:.5}
 <body>
 <section id="login" hidden>
   <h1 style="margin-bottom:20px">Yanastan Admin</h1>
-  <form id="lf">
-    <label>Email<input id="em" type="email" required autocomplete="username"></label>
-    <label>Password<input id="pw" type="password" required autocomplete="current-password"></label>
-    <button>Sign in</button><p id="lerr" class="err"></p>
-  </form>
+  <button id="gbtn" style="width:100%">Sign in with Google</button>
+  <p id="lerr" class="err" role="alert" style="margin-top:12px"></p>
 </section>
 
 <section id="app" hidden>
@@ -93,11 +90,12 @@ button:disabled{opacity:.5}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
-const ADMIN_EMAIL = "YOUR_ADMIN_EMAIL_HERE"; // the producer's login email, same as in the rules
+const ADMIN_EMAIL = "YOUR_ADMIN_EMAIL_HERE"; // the producer's Google email, same as in the rules
+const ADMIN_UID = ""; // optional: the producer's Firebase UID (Authentication > Users). If set, it is checked instead of the email.
 const app = initializeApp({
   apiKey: "AIzaSyDZz7eQ7KieJI4A3692xFp6S0DDudyoShY",
   authDomain: "yanastan-com.firebaseapp.com",
@@ -117,7 +115,7 @@ const watch = (name, fn) => onSnapshot(query(collection(db, name), orderBy("crea
 const none = t => `<p class="empty">${t}</p>`;
 
 onAuthStateChanged(auth, u => {
-  const ok = u && u.email === ADMIN_EMAIL;
+  const ok = u && (ADMIN_UID ? u.uid === ADMIN_UID : (u.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
   $("login").hidden = !!ok; $("app").hidden = !ok;
   unsubs.forEach(f => f()); unsubs = [];
   if (u && !ok) { $("lerr").textContent = "This account is not allowed here."; signOut(auth); }
@@ -163,9 +161,15 @@ onAuthStateChanged(auth, u => {
   }));
 });
 
-$("lf").onsubmit = async e => {
-  e.preventDefault(); $("lerr").textContent = "";
-  try { await signInWithEmailAndPassword(auth, $("em").value, $("pw").value); } catch { $("lerr").textContent = "Wrong email or password."; }
+$("gbtn").onclick = async () => {
+  $("lerr").textContent = "";
+  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch (err) {
+    if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") return;
+    $("lerr").textContent = err.code === "auth/unauthorized-domain" ? "Add this domain in Firebase Authentication > Settings > Authorized domains."
+      : err.code === "auth/operation-not-allowed" ? "Turn on Google in Firebase Authentication > Sign-in method."
+      : err.code === "auth/popup-blocked" ? "Your browser blocked the popup. Allow popups and try again." : "Google sign-in failed. Try again.";
+  }
 };
 $("out").onclick = () => signOut(auth);
 $("tabs").onclick = e => { const t = e.target.closest("button")?.dataset.t; if (!t) return;
