@@ -49,7 +49,7 @@ button:disabled{opacity:.5}
   <div class="wrap">
     <div class="tabs" id="tabs">
       <button data-t="beats" class="on">Beats</button><button data-t="orders">Orders <span id="oc"></span></button>
-      <button data-t="requests">Requests <span id="rc"></span></button><button data-t="site">Site</button>
+      <button data-t="requests">Requests <span id="rc"></span></button>
     </div>
 
     <div id="t-beats">
@@ -71,15 +71,6 @@ button:disabled{opacity:.5}
     <div id="t-orders" hidden><div class="card"><h2>Orders</h2><div id="orders"></div></div></div>
     <div id="t-requests" hidden><div class="card"><h2>Custom beat and mix and master requests</h2><div id="requests"></div></div></div>
 
-    <div id="t-site" hidden><div class="card"><h2>Site settings</h2>
-      <form id="sf">
-        <label class="full">Contact email shown on the site<input id="s-contact" type="email"></label>
-        <label class="full">Hero image link (blank = default photo)<input id="s-hero" type="url" placeholder="https://..."></label>
-        <label class="full">Licensing info<textarea id="s-licensing" rows="6"></textarea></label>
-        <label class="full">Terms of use<textarea id="s-terms" rows="6"></textarea></label>
-        <label class="full">Privacy policy<textarea id="s-privacy" rows="6"></textarea></label>
-        <div class="full"><button>Save settings</button></div><p class="full" id="smsg"></p>
-      </form></div></div>
   </div>
 </section>
 
@@ -140,10 +131,6 @@ onAuthStateChanged(auth, u => {
       <button class="g del" data-rd="${r.id}">Delete</button></div>`).join("") || none("No requests yet.");
   }));
 
-  unsubs.push(onSnapshot(doc(db, "settings", "site"), s => {
-    const d = s.data() || {};
-    for (const k of ["contact", "hero", "licensing", "terms", "privacy"]) if (document.activeElement !== $("s-" + k)) $("s-" + k).value = d[k] || "";
-  }));
 });
 
 $("gbtn").onclick = async () => {
@@ -159,13 +146,7 @@ $("gbtn").onclick = async () => {
 $("out").onclick = () => signOut(auth);
 $("tabs").onclick = e => { const t = e.target.closest("button")?.dataset.t; if (!t) return;
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
-  ["beats", "orders", "requests", "site"].forEach(x => $("t-" + x).hidden = x !== t); };
-
-$("sf").onsubmit = async e => {
-  e.preventDefault();
-  try { await setDoc(doc(db, "settings", "site"), Object.fromEntries(["contact", "hero", "licensing", "terms", "privacy"].map(k => [k, $("s-" + k).value.trim()]))); $("smsg").textContent = "Saved. The site is updated."; $("smsg").className = ""; }
-  catch (err) { $("smsg").textContent = "Failed: " + err.message; $("smsg").className = "err"; }
-};
+  ["beats", "orders", "requests"].forEach(x => $("t-" + x).hidden = x !== t); };
 
 const duration = src => new Promise(r => { const a = new Audio(); a.preload = "metadata"; a.src = src; a.onloadedmetadata = () => r(Math.round(a.duration)); a.onerror = () => r(0); });
 async function upload(folder, f, label) {
