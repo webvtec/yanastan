@@ -49,7 +49,7 @@ button:disabled{opacity:.5}
   <div class="wrap">
     <div class="tabs" id="tabs">
       <button data-t="beats" class="on">Beats</button><button data-t="orders">Orders <span id="oc"></span></button>
-      <button data-t="members">Artists <span id="mc"></span></button><button data-t="requests">Requests <span id="rc"></span></button><button data-t="site">Site</button>
+      <button data-t="requests">Requests <span id="rc"></span></button><button data-t="site">Site</button>
     </div>
 
     <div id="t-beats">
@@ -59,11 +59,8 @@ button:disabled{opacity:.5}
           <label>BPM<input id="bpm" type="number" min="40" max="220"></label>
           <label>Tags (comma separated)<input id="tags" placeholder="Dancehall, type beat"></label>
           <label>MP3 lease price in USD (blank = $60)<input id="price" type="number" min="0" step="0.01"></label>
-          <label class="full">Preview audio, tagged (plays on the site for everyone)<input id="file" type="file" accept="audio/*"></label>
-          <label class="full">Or paste a preview audio link<input id="url" type="url" placeholder="https://..."></label>
-          <label class="full">Untagged MP3 for members (optional, private, only active members can download)<input id="untag" type="file" accept="audio/*"></label>
+          <label class="full">Preview audio (plays on the site for everyone)<input id="file" type="file" accept="audio/*"></label>
           <label class="full">Cover image (optional)<input id="cover" type="file" accept="image/*"></label>
-          <label class="ck full"><input id="excl" type="checkbox"> Members-only beat (hidden from visitors who are not active members)</label>
           <div class="full"><button id="add">Publish beat</button></div>
           <p class="full" id="msg"></p>
         </form>
@@ -72,8 +69,6 @@ button:disabled{opacity:.5}
     </div>
 
     <div id="t-orders" hidden><div class="card"><h2>Orders</h2><div id="orders"></div></div></div>
-    <div id="t-members" hidden><div class="card"><h2>Artists who joined</h2>
-      <p class="tag" style="margin-bottom:10px">New requests show as pending. Arrange payment, then press Activate. Activate or Renew gives 10 untagged downloads.</p><div id="members"></div></div></div>
     <div id="t-requests" hidden><div class="card"><h2>Custom beat and mix and master requests</h2><div id="requests"></div></div></div>
 
     <div id="t-site" hidden><div class="card"><h2>Site settings</h2>
@@ -124,9 +119,8 @@ onAuthStateChanged(auth, u => {
   unsubs.push(watch("beats", L => {
     $("n").textContent = L.length;
     $("list").innerHTML = L.map(b => `<div class="row">${b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="">` : ""}
-      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"} · ${b.exclusive ? "Members only" : "Public"} · ${b.untaggedPath ? "Has member download" : "No member download"}</small></div>
+      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"}</small></div>
       <button class="g" data-e="${b.id}" data-t="${esc(b.title)}" data-b="${esc(b.bpm)}" data-p="${esc(b.price)}">Edit</button>
-      <button class="g" data-x="${b.id}" data-v="${b.exclusive ? 0 : 1}">${b.exclusive ? "Make public" : "Make members only"}</button>
       <button class="g del" data-d="${b.id}">Delete</button></div>`).join("") || none("No beats yet. Add your first one above.");
   }));
 
@@ -136,15 +130,6 @@ onAuthStateChanged(auth, u => {
       <b>$${Number(o.total).toFixed(2)}</b><span class="tag ${o.status === "new" ? "hot" : ""}">${esc(o.status)}</span>
       <button class="g" data-os="${o.id}" data-s="${o.status === "new" ? "done" : "new"}">${o.status === "new" ? "Mark done" : "Reopen"}</button>
       <button class="g del" data-od="${o.id}">Delete</button></div>`).join("") || none("No orders yet.");
-  }));
-
-  unsubs.push(watch("members", L => {
-    $("mc").textContent = L.filter(m => m.status === "pending").length || "";
-    $("members").innerHTML = L.map(m => `<div class="row"><div class="m"><b>${esc(m.name)}</b><small>${esc(m.email)} · joined ${day(m.createdAt)} · ${esc(m.plan)}</small></div>
-      <span class="tag ${m.status === "pending" ? "hot" : ""}">${esc(m.status)}</span><span class="tag">${m.downloadsLeft ?? 0} downloads left</span>
-      <button class="g" data-ma="${m.id}">${m.status === "active" ? "Renew" : "Activate"}</button>
-      <button class="g" data-md="${m.id}" data-n="${m.downloadsLeft ?? 0}">Set downloads</button>
-      <button class="g" data-mc="${m.id}">Cancel</button><button class="g del" data-mx="${m.id}">Delete</button></div>`).join("") || none("No artists have joined yet.");
   }));
 
   unsubs.push(watch("requests", L => {
@@ -174,7 +159,7 @@ $("gbtn").onclick = async () => {
 $("out").onclick = () => signOut(auth);
 $("tabs").onclick = e => { const t = e.target.closest("button")?.dataset.t; if (!t) return;
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
-  ["beats", "orders", "members", "requests", "site"].forEach(x => $("t-" + x).hidden = x !== t); };
+  ["beats", "orders", "requests", "site"].forEach(x => $("t-" + x).hidden = x !== t); };
 
 $("sf").onsubmit = async e => {
   e.preventDefault();
@@ -191,16 +176,15 @@ async function upload(folder, f, label) {
 
 $("af").onsubmit = async e => {
   e.preventDefault();
-  const f = $("file").files[0], link = $("url").value.trim(), c = $("cover").files[0], u = $("untag").files[0];
-  if (!f && !link) return say("Choose a preview audio file or paste a link.", true);
+  const f = $("file").files[0], c = $("cover").files[0];
+  if (!f) return say("Choose a preview audio file.", true);
   $("add").disabled = true;
   try {
-    let audioUrl = link, dur;
-    if (f) { dur = await duration(URL.createObjectURL(f)); audioUrl = await getDownloadURL(await upload("beats", f, "preview")); } else dur = await duration(link);
+    const dur = await duration(URL.createObjectURL(f));
+    const audioUrl = await getDownloadURL(await upload("beats", f, "preview"));
     const coverUrl = c ? await getDownloadURL(await upload("covers", c, "cover")) : "";
-    const untaggedPath = u ? (await upload("untagged", u, "member file")).fullPath : "";
     await addDoc(collection(db, "beats"), { title: $("title").value.trim(), bpm: +$("bpm").value || 0, tags: $("tags").value.trim() || "Dancehall",
-      price: $("price").value || "", audioUrl, coverUrl, untaggedPath, exclusive: $("excl").checked, duration: dur, createdAt: serverTimestamp() });
+      price: $("price").value || "", audioUrl, coverUrl, exclusive: false, duration: dur, createdAt: serverTimestamp() });
     $("af").reset(); say("Published. It is live on the site.");
   } catch (err) { say("Failed: " + err.message, true); }
   $("add").disabled = false;
@@ -210,7 +194,6 @@ document.addEventListener("click", async e => {
   const d = e.target.dataset; if (!e.target.closest("button")) return;
   try {
     if (d.d && confirm("Delete this beat?")) await deleteDoc(doc(db, "beats", d.d));
-    if (d.x) await updateDoc(doc(db, "beats", d.x), { exclusive: d.v === "1" });
     if (d.e) {
       const title = prompt("Title", d.t); if (title === null) return;
       const bpm = prompt("BPM", d.b); if (bpm === null) return;
@@ -221,10 +204,6 @@ document.addEventListener("click", async e => {
     if (d.od && confirm("Delete this order?")) await deleteDoc(doc(db, "orders", d.od));
     if (d.rs) await updateDoc(doc(db, "requests", d.rs), { status: d.s });
     if (d.rd && confirm("Delete this request?")) await deleteDoc(doc(db, "requests", d.rd));
-    if (d.ma) await updateDoc(doc(db, "members", d.ma), { status: "active", downloadsLeft: 10 });
-    if (d.mc && confirm("Cancel this membership?")) await updateDoc(doc(db, "members", d.mc), { status: "cancelled", downloadsLeft: 0 });
-    if (d.md) { const n = prompt("Downloads left", d.n); if (n !== null && !isNaN(+n)) await updateDoc(doc(db, "members", d.md), { downloadsLeft: Math.max(0, Math.floor(+n)) }); }
-    if (d.mx && confirm("Delete this artist record?")) await deleteDoc(doc(db, "members", d.mx));
   } catch (err) { alert("Failed: " + err.message); }
 });
 </script>
