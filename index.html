@@ -48,6 +48,7 @@ h2{font:400 clamp(18px,3vw,24px) Michroma,sans-serif;color:var(--gold);margin:40
 .ic:hover{color:var(--gold);background:var(--panel)}
 .buy{background:var(--gold);color:#000;border:0;border-radius:6px;padding:9px 14px;font-weight:700;white-space:nowrap;text-decoration:none;display:inline-block}
 .empty{padding:36px 4px;color:var(--mute)}
+.adm{border:1px solid var(--line);color:var(--txt);border-radius:20px;padding:6px 14px;text-decoration:none;font-size:15px}.adm:hover{border-color:var(--gold);color:var(--gold)}
 .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
 .plan{background:var(--gold);color:#000;border-radius:10px;padding:26px;text-align:center;display:flex;flex-direction:column}
 .plan .p.sm{font-size:22px;line-height:46px}
@@ -72,7 +73,7 @@ dialog input{width:100%;background:#0a0606;border:1px solid var(--line);color:va
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:20px;font-weight:700;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
 @media(max-width:760px){
- header{gap:8px 14px;padding:8px 14px}nav{order:3;width:100%;margin:0;justify-content:space-around;gap:10px}#cartBtn{margin-left:auto}
+ header{gap:8px 14px;padding:8px 14px}nav{order:3;width:100%;margin:0;justify-content:space-around;gap:10px}.adm{margin-left:auto}
  .row{grid-template-columns:52px minmax(0,1fr) 34px auto;gap:8px}.row>.c,.row>.tg,.row.h{display:none}.info small{display:block}.buy{padding:9px 10px}
  .hero{min-height:52vh}
 }
@@ -88,6 +89,7 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 <header>
   <a class="logo" href="#top"><i>Y</i>YANASTAN</a>
   <nav><a href="#beats">Beats</a><a href="#licensing">Licensing</a><a href="#contact">Contact</a></nav>
+  <a class="adm" href="admin.html">Admin</a>
   <button id="cartBtn" aria-label="Open cart"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/></svg><span id="ct">$0.00</span></button>
 </header>
 
