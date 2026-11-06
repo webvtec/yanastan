@@ -10,7 +10,7 @@
 :root{--red:#a80000;--red2:#7d0000;--gold:#c9a45c;--bg:#0a0a0a;--panel:#141010;--line:#2a1f1f;--txt:#efe6d2;--mute:#9a8f7c}
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth;scroll-padding-top:110px}
-body{background:var(--bg);color:var(--txt);font:500 16px/1.4 Barlow,system-ui,sans-serif;padding-bottom:84px}
+body{background:var(--bg);color:var(--txt);font:500 16px/1.4 Barlow,system-ui,sans-serif;padding-bottom:0}
 button{font:inherit;cursor:pointer;color:inherit}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 a{color:var(--gold)}
@@ -34,7 +34,7 @@ h2{font:400 clamp(18px,3vw,24px) Michroma,sans-serif;color:var(--gold);margin:40
 .bar input{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);color:var(--txt);padding:11px 16px;border-radius:24px;font:inherit}
 .chip{background:none;border:1px solid var(--line);color:var(--mute);padding:6px 14px;border-radius:20px}
 .chip.on{background:var(--red);border-color:var(--red);color:var(--gold)}
-.row{display:grid;grid-template-columns:52px minmax(0,1fr) 60px 50px minmax(0,1fr) 36px 36px auto;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line)}
+.row{display:grid;grid-template-columns:52px minmax(0,1fr) 60px 50px minmax(0,1fr) 36px auto;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line)}
 .row.h{color:var(--mute);font-size:13px;border-bottom-color:var(--red2)}
 .row.cur{background:linear-gradient(90deg,#2a0505,transparent)}
 .row.hit{outline:2px solid var(--gold)}
@@ -46,19 +46,18 @@ h2{font:400 clamp(18px,3vw,24px) Michroma,sans-serif;color:var(--gold);margin:40
 .tg{color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ic{width:36px;height:36px;background:none;border:0;color:var(--txt);border-radius:50%;display:grid;place-items:center}
 .ic:hover{color:var(--gold);background:var(--panel)}
-.buy{background:var(--gold);color:#000;border:0;border-radius:6px;padding:9px 14px;font-weight:700;white-space:nowrap}
+.buy{background:var(--gold);color:#000;border:0;border-radius:6px;padding:9px 14px;font-weight:700;white-space:nowrap;text-decoration:none;display:inline-block}
 .empty{padding:36px 4px;color:var(--mute)}
-.plan{background:var(--gold);color:#000;border-radius:10px;padding:26px;max-width:340px;margin:auto;text-align:center}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.plan{background:var(--gold);color:#000;border-radius:10px;padding:26px;text-align:center;display:flex;flex-direction:column}
+.plan .p.sm{font-size:22px;line-height:46px}
+.plan ul{flex:1}
+.plan .btn{margin-top:auto}
 .plan h3{font-size:20px}.plan .p{font:400 38px Michroma;margin:10px 0 0}
 .plan ul{list-style:none;padding:0;margin:16px 0;font-weight:600}.plan li{margin:6px 0}
 .plan .btn{background:#000;color:var(--txt);width:100%}
 footer{max-width:1100px;margin:60px auto 0;padding:24px 20px;border-top:1px solid var(--line);color:var(--mute);display:flex;gap:28px;flex-wrap:wrap}
 footer a{display:block;margin:4px 0;text-decoration:none;color:var(--txt)}
-#bar{position:fixed;inset:auto 0 0;background:#0f0808;border-top:2px solid var(--red);padding:10px 20px;display:flex;align-items:center;gap:14px;z-index:6}
-#bar b{flex:0 1 180px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#bar input{flex:1;min-width:0;accent-color:var(--gold)}
-#bar span{color:var(--mute);font-size:13px;min-width:88px;text-align:right}
-.pl{width:38px;height:38px;border-radius:50%;border:0;background:var(--red);color:var(--gold)}
 dialog{background:#120c0c;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:22px;width:min(560px,94vw);max-height:90vh;overflow:auto}
 dialog::backdrop{background:rgba(0,0,0,.75)}
 dialog.side{margin:0 0 0 auto;height:100vh;max-height:100vh;border-radius:0;width:min(400px,100vw)}
@@ -70,35 +69,32 @@ dialog.side{margin:0 0 0 auto;height:100vh;max-height:100vh;border-radius:0;widt
 .ci button{background:none;border:0;color:var(--mute);text-decoration:underline}
 dialog input{width:100%;background:#0a0606;border:1px solid var(--line);color:var(--txt);padding:11px;border-radius:6px;font:inherit;margin:10px 0}
 .tot{display:flex;justify-content:space-between;font-weight:700;font-size:18px;margin-top:14px}
-#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:20px;font-weight:700;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:20px;font-weight:700;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
 @media(max-width:760px){
- header{gap:8px 14px;padding:8px 14px}nav{order:3;width:100%;margin:0;justify-content:space-around;gap:10px}#acctBtn{margin-left:auto}
- .row{grid-template-columns:52px minmax(0,1fr) 34px 34px auto;gap:8px}.row>.c,.row>.tg,.row.h{display:none}.info small{display:block}.buy{padding:9px 10px}
- .hero{min-height:52vh}#bar span{display:none}#bar{padding:10px 14px}
+ header{gap:8px 14px;padding:8px 14px}nav{order:3;width:100%;margin:0;justify-content:space-around;gap:10px}#cartBtn{margin-left:auto}
+ .row{grid-template-columns:52px minmax(0,1fr) 34px auto;gap:8px}.row>.c,.row>.tg,.row.h{display:none}.info small{display:block}.buy{padding:9px 10px}
+ .hero{min-height:52vh}
 }
-.lg{background:none;border:1px solid var(--line);color:var(--txt);border-radius:20px;padding:6px 14px}
-.lg:hover{border-color:var(--gold);color:var(--gold)}
-.mb{font:600 11px Barlow;font-style:normal;background:var(--red);color:var(--gold);border-radius:10px;padding:2px 8px;margin-left:8px;vertical-align:middle}
 dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var(--line);color:var(--txt);padding:11px;border-radius:6px;font:inherit;margin:10px 0}
 .err{color:#ff6b6b}.note{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin:12px 0}
 .g{background:none;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:8px 14px}
 .legal{white-space:pre-wrap}
+.doc h4{color:var(--gold);font-size:15px;margin:18px 0 6px}.doc h5{font-size:14px;margin:12px 0 4px}.doc p,.doc li{font-size:14px;color:var(--txt);margin:6px 0}.doc ul{padding-left:20px}.doc .eff{color:var(--mute)}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
 <header>
   <a class="logo" href="#top"><i>Y</i>YANASTAN</a>
-  <nav><a href="#beats">Beats</a><a href="#memberships">Memberships</a><a href="#contact">Contact</a></nav>
-  <button class="lg" id="acctBtn">Log in</button>
+  <nav><a href="#beats">Beats</a><a href="#licensing">Licensing</a><a href="#contact">Contact</a></nav>
   <button id="cartBtn" aria-label="Open cart"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/></svg><span id="ct">$0.00</span></button>
 </header>
 
 <div class="hero" id="top"><div>
   <h1>Dancehall beats, ready to record.</h1>
   <p>Press play, pick a license and start writing. Fresh Yanastan instrumentals added all the time.</p>
-  <a class="btn" href="#beats">Browse beats</a> <a class="btn red" href="#memberships">Memberships</a>
+  <a class="btn" href="#beats">Browse beats</a> <a class="btn red" href="#licensing">Licensing</a>
 </div></div>
 
 <div class="bar" id="beats">
@@ -106,17 +102,22 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
   <span id="chips" style="display:contents"></span>
 </div>
 <section>
-  <div class="row h"><span></span><span>Title</span><span>Time</span><span>BPM</span><span>Tags</span><span></span><span></span><span></span></div>
+  <div class="row h"><span></span><span>Title</span><span>Time</span><span>BPM</span><span>Tags</span><span></span><span></span></div>
   <div id="list"><p class="empty">Loading beats…</p></div>
 </section>
 
-<section id="memberships">
-  <h2>Memberships</h2>
-  <div class="plan">
-    <b>Recommended</b><h3>Artist</h3><div class="p">$35</div><b>Monthly</b>
-    <ul><li>10 untagged MP3 sample downloads</li><li>Profit use allowed</li><li>1 free custom beat or mix and master every 3 months</li><li>Access to exclusive member-only beats</li></ul>
-    <button class="btn" id="join">Join now</button>
-    <p style="font-size:13px;margin-top:12px">After cancelling you keep songs already released. New releases with membership beats need an active plan.</p>
+<section id="licensing">
+  <h2>Licensing</h2>
+  <div class="plans">
+    <div class="plan"><h3>MP3 &amp; WAV</h3><div class="p">$40.00</div>
+      <ul><li>MP3 file</li><li>WAV file</li><li>Delivered by email after payment</li></ul>
+      <a class="btn" href="#beats">Browse beats</a></div>
+    <div class="plan"><h3>Unlimited Stems</h3><div class="p">$200.00</div>
+      <ul><li>MP3 and WAV files</li><li>Full stems</li><li>Unlimited use</li></ul>
+      <a class="btn" href="#beats">Browse beats</a></div>
+    <div class="plan"><h3>Exclusive</h3><div class="p sm">Make an offer</div>
+      <ul><li>MP3, WAV and stems</li><li>Exclusive rights to the beat</li><li>Name your price</li></ul>
+      <a class="btn" id="offerAny" href="#">Make an offer</a></div>
   </div>
 </section>
 
@@ -127,32 +128,22 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 
 <footer>
   <div><b style="color:var(--gold);font:400 15px Michroma">YANASTAN</b><p>Yanastan Entertainment</p></div>
-  <div><a href="#top">Home</a><a href="#beats">Beats</a><a href="#memberships">Memberships</a><a href="#contact">Contact</a></div>
+  <div><a href="#top">Home</a><a href="#beats">Beats</a><a href="#licensing">Licensing</a><a href="#contact">Contact</a></div>
   <div><a href="#" data-info="licensing">Licensing info</a><a href="#" data-info="terms">Terms of use</a><a href="#" data-info="privacy">Privacy policy</a></div>
 </footer>
 
-<div id="bar" hidden>
-  <button class="pl" id="pp" aria-label="Play or pause">▶</button><b id="now"></b>
-  <input id="seek" type="range" min="0" max="100" value="0" aria-label="Seek"><span id="tm">0:00 / 0:00</span>
-</div>
-
 <dialog id="dLic"></dialog>
-<dialog id="dSmp"><div class="dh"><h3 id="smT">Sample download</h3><button class="x" data-x aria-label="Close">×</button></div>
-  <div id="smB"></div></dialog>
 <dialog id="dCart" class="side"></dialog>
-<dialog id="dAuth"></dialog>
-<dialog id="dAcct"></dialog>
 <dialog id="dInfo"></dialog>
 <div id="toast" role="status"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, query, where, onSnapshot, addDoc, setDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+import { getFirestore, collection, query, where, onSnapshot, addDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const CONTACT = "info@yanastan.com"; // change to the producer's email
-const LIC = [["MP3 Lease","MP3 file",0],["Stems","MP3, stems and WAV",139.99],["Remake this beat (Exclusive)","MP3, stems and WAV",220],["Unlimited Stems","MP3, stems and WAV",300]];
+// [name, files included, price]. A null price means "make an offer".
+const LIC = [["MP3 & WAV","MP3 and WAV files",40],["Unlimited Stems","MP3, WAV and stems, unlimited use",200],["Exclusive","MP3, WAV and stems with exclusive rights",null]];
 const app = initializeApp({
   apiKey: "AIzaSyDZz7eQ7KieJI4A3692xFp6S0DDudyoShY",
   authDomain: "yanastan-com.firebaseapp.com",
@@ -161,45 +152,71 @@ const app = initializeApp({
   messagingSenderId: "188003047512",
   appId: "1:188003047512:web:dde20ba8b146b11df9922d"
 });
-const db = getFirestore(app), auth = getAuth(app), st = getStorage(app);
+const db = getFirestore(app);
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = s => isFinite(s) && s ? Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0") : "0:00";
 const usd = n => "$" + Number(n).toFixed(2);
-const IC = {dl:'<svg viewBox="0 0 24 24"><path d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg>', sh:'<svg viewBox="0 0 24 24"><path d="M4 12v7h16v-7M12 3v12M7 8l5-5 5 5"/></svg>'};
+const IC = {sh:'<svg viewBox="0 0 24 24"><path d="M4 12v7h16v-7M12 3v12M7 8l5-5 5 5"/></svg>'};
 const audio = new Audio(); audio.preload = "none";
 let beats = [], shown = [], cur = null, tag = "All", cart = [];
 try { cart = JSON.parse(localStorage.getItem("yc") || "[]"); } catch {}
 const DEF = { contact: CONTACT, hero: "",
-  licensing: "MP3 Lease: MP3 file for one project.\nStems: MP3, stems and WAV for mixing.\nRemake this beat (Exclusive): MP3, stems and WAV, with exclusive rights.\nUnlimited Stems: MP3, stems and WAV with unlimited use.\n\nFiles are delivered by email after payment is confirmed. Contact us for the full contract.",
-  terms: "By using this site and buying a license you agree to these terms. Licenses are granted after payment is received. Beats may not be resold or redistributed as instrumentals. Memberships give access to member features while the membership is active. Contact us with any question.",
-  privacy: "We collect your email, and your artist name if you join, to run your account, orders and requests. We do not sell your data. Data is stored with Google Firebase. Contact us to have your data removed." };
-let site = DEF, member = null, unsubB = null, unsubM = null, wasM, hitDone = false, authMode = "in", wantJoin = false;
-const isM = () => member && member.status === "active";
-function applySite() { $("mail").textContent = site.contact; $("mail").href = "mailto:" + site.contact;
+  licensing: "MP3 & WAV: $40.00. MP3 and WAV files.\nUnlimited Stems: $200.00. MP3, WAV and stems with unlimited use.\nExclusive: make an offer. MP3, WAV and stems with exclusive rights.\n\nFiles are delivered by email after payment is confirmed. Contact us for the full contract." };
+
+const L = (title, eff, parts) => `<div class="doc"><p class="eff">Effective date: ${eff}</p>${parts}</div>`;
+const sec = (h, ...ps) => `<h4>${h}</h4>` + ps.map(p => Array.isArray(p) ? "<ul>" + p.map(i => `<li>${i}</li>`).join("") + "</ul>" : `<p>${p}</p>`).join("");
+const LEGAL = {
+  terms: m => L("Terms", "November 5, 2026",
+    `<p>Yanastan Entertainment ("Website", "us", "we" or "our") operates this website and related services (the "Service"). These Terms and Conditions govern your use of the Service and may change from time to time. "You" means an individual, or the business or group you represent.</p><p><b>Please read these terms carefully. By using the Website or related services you agree to be bound by them.</b></p>` +
+    sec("Use of materials on the Website", "The information, artwork, text, video, audio, pictures, software and other intellectual property (the \"Materials\") on the Website are protected by copyright and international law. You may access and use the Materials for personal or educational purposes, or as expressly allowed in these terms or in a license you have purchased. You may not otherwise reproduce, distribute, publicly perform, publicly display, modify or create derivative works of the Materials without permission from the copyright owner. You may not link directly to any media file on the Website server, and you may not claim any Materials as your own work. To use our logos, contact us at " + m + ".") +
+    sec("Licenses and purchases", "Beats are licensed, not sold, unless you buy an Exclusive license. Licenses are granted after payment is received. After you place an order we will email you a payment link, and we deliver your files by email once payment is confirmed.", "MP3 &amp; WAV: MP3 and WAV files. Unlimited Stems: MP3, WAV and stems with unlimited use. Exclusive: MP3, WAV and stems with exclusive rights, priced by offer and agreed with us directly.", "Beats may not be resold or redistributed as instrumentals. Buyers are responsible for clearing any samples in a composition they purchase.") +
+    sec("Copyright and trademark infringement", "All compositions, sound recordings, art and other written or visual images (the \"Content\") are posted by us, and we represent that neither the Content nor the names under which it is promoted infringe any third party's rights. If you believe any Content or name on the Website is used in violation of your rights, email " + m + " with details. After receiving written notice we will, in most cases, either remove the Content or name from the pages identified or remove those pages entirely.") +
+    sec("Refund policy", "We do not offer refunds. If there is a problem with an order, contact " + m + " immediately and we will aim to solve it amicably. No refund will be given if a user violates these terms or a license agreement.") +
+    sec("Your conduct", "You shall use the Website for lawful purposes only. You shall not post or transmit any material that infringes the rights of others, or that is unlawful, threatening, abusive, defamatory, invasive of privacy, obscene or otherwise objectionable, or that without our prior approval contains advertising or solicitation. If we believe a user abuses the Website, including possible copyright infringement, libel or slander, or payment fraud, we may share certain information with third parties as described in our Privacy Policy. We reserve the right to refuse service and cancel orders at our sole discretion.") +
+    sec("Content", "Content may contain profanity or material that is inappropriate for children or other users. You must evaluate and bear the risk of using the Website. We suggest parents supervise their children's online activity. You may contact us about possibly offensive material, and we may act on such notices at our discretion.") +
+    sec("Warranty disclaimer", "<b>YOU AGREE THAT USE OF THE WEBSITE AND RELATED SERVICES IS AT YOUR SOLE RISK. THE WEBSITE, MATERIALS AND SERVICES ARE PROVIDED \"AS IS\" AND \"AS AVAILABLE\". WE MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT, AND DO NOT GUARANTEE THAT THE WEBSITE WILL BE UNINTERRUPTED OR ERROR-FREE.</b> Some jurisdictions do not allow certain disclaimers, so some of this may not apply to you, and nothing here excludes liability beyond what the law permits.") +
+    sec("Limitation of liability", "You agree to release and hold us and our employees, agents, affiliates and service providers harmless from losses, damages and claims arising from the Website, Materials or related services, including computer, network or software failures, delayed transmissions, events beyond our control, and typographical errors. You agree to defend and indemnify us against any third-party claim, including reasonable attorney's fees, arising from your use of the Service, your breach of these terms, or your violation of any third party's rights. <b>IN NO EVENT WILL WE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL OR CONSEQUENTIAL DAMAGES OR LOSS OF REVENUE, EVEN IF ADVISED OF THEIR POSSIBILITY.</b>") +
+    sec("General provisions", "You agree to comply with all laws that apply to the transmission of technical data from your country. Dealings with parties found through the Website are solely between you and those parties. These terms are governed by the laws of Kingston, Jamaica, and legal proceedings related to them shall be brought only in the courts of Kingston, Jamaica. If any provision is held invalid, the rest remain in force. Our failure to act on a breach does not waive our right to act on later breaches. These terms are the entire agreement on their subject matter and replace earlier proposals or agreements.") +
+    sec("Age requirements", "The Service is available to people aged 13 or older. If you are under 18, review these terms with a parent or guardian to make sure you both understand them.") +
+    sec("Changes to these terms", "We may modify these terms at our discretion by posting a revised version on the Website. Changes take effect when posted, and we are not required to notify you. Each time you use the Website you are deemed to accept the current terms.")),
+  privacy: m => L("Privacy", "November 5, 2026",
+    `<p>Yanastan Entertainment ("Website", "us", "we" or "our") is committed to protecting your privacy online. This policy explains what personal data we collect when you use our website and related services (the "Service"), how we use it, and the choices you have. By using the Service you agree to the collection and use of information as described here.</p>` +
+    sec("Definitions", "<b>Personal Data</b> is data about a living individual who can be identified from it. <b>Usage Data</b> is data collected automatically when you use the Service, such as the duration of a page visit. <b>Cookies</b> and similar storage are small pieces of data stored on your device. We are the <b>Data Controller</b> of your data, and the <b>Service Providers</b> we use are Data Processors that handle data on our behalf.") +
+    sec("Information we collect", "While using the Service we may ask you for information that can be used to contact or identify you, such as:", ["Email address (required to place an order)", "Name, if you give it when making an offer or contacting us", "Order details: the beats and licenses in your order and the total", "Any message or offer you send us by email"],
+      "We may use your email to reply to your order or offer, and to send updates about our beats. You can opt out of marketing emails at any time by following the instructions in the email or by contacting us.") +
+    sec("Usage Data", "Our hosting and technology providers may automatically receive information your browser sends, such as your IP address, browser type and version, the pages you visit, the time and date of your visit, the time spent on pages, device identifiers and other diagnostic data. On mobile this can include your device type and operating system.") +
+    sec("Cookies and local storage", "We store your shopping cart in your browser's local storage so it is still there when you come back. You can clear it at any time in your browser settings. Browsers may also let you refuse cookies, but parts of the Service may not work if you do.") +
+    sec("How we use your data", ["To provide and maintain the Service and process your orders and offers", "To email you payment links and deliver your files", "To provide customer support", "To notify you about changes to the Service or new releases", "To monitor usage and detect, prevent and address technical issues", "To protect against abuse, including copyright infringement and payment fraud"]) +
+    sec("Sharing of data", "We do not sell, rent or trade your personal information. We may share the information needed to complete your transaction with third parties who help us, such as payment providers, and we work to disclose only what is necessary. This policy does not apply to those third parties. If we believe a user abuses the Website, we reserve the right to share certain information with third parties.") +
+    sec("Service providers", "We use Google Firebase to store orders and site data and to host parts of the Service. These providers have access to your data only to perform tasks for us and are obligated not to use it for other purposes.") +
+    sec("Payments", "We do not collect or store your payment card details on this website. Payment is arranged by email, and card details are handled by the payment processor you use, under its own privacy policy.") +
+    sec("Retention of data", "We keep your personal data only as long as needed for the purposes in this policy, to meet legal obligations, resolve disputes and enforce our agreements. Usage Data is generally kept for a shorter time unless needed for security or to improve the Service.") +
+    sec("Transfer of data", "Your information may be transferred to, and kept on, computers outside your country where data protection laws may differ. By submitting information you agree to that transfer. We take reasonable steps to make sure your data is treated securely and in line with this policy.") +
+    sec("Disclosure of data", "If we are involved in a merger, acquisition or asset sale, your data may be transferred and we will give notice first. We may disclose your data if required by law or valid requests from public authorities, or in good faith to comply with a legal obligation, protect our rights or property, investigate wrongdoing, protect the safety of users or the public, or protect against legal liability.") +
+    sec("Security of data", "Security matters to us, but no method of transmission over the Internet or electronic storage is 100% secure. We use commercially acceptable means to protect your data but cannot guarantee absolute security.") +
+    sec("Do Not Track", "We do not support Do Not Track signals. You can set this preference in your browser's settings.") +
+    sec("Your rights", "We aim to let you correct, amend, delete or limit the use of your data. You can ask us what data we hold about you, request a copy in a commonly used electronic format, ask us to correct inaccurate data, or ask us to delete it, by emailing " + m + ". We may ask you to verify your identity first.") +
+    sec("Links to other websites", "The Service may link to websites we do not operate. We have no control over and take no responsibility for their content or privacy practices, so please review the policy of every site you visit.") +
+    sec("Children's privacy", "The Service is not directed at anyone under 13, and we do not knowingly collect personal data from them. If you are a parent or guardian and believe your child has given us personal data, contact " + m + " and we will take steps to remove it.") +
+    sec("Changes to this policy", "We may update this policy from time to time by posting the new version on this page and updating the effective date. Changes take effect when posted.") +
+    sec("Contact us", "Questions about this policy? Email " + m + "."))
+};
+let site = DEF;
+const offerLink = title => "mailto:" + site.contact + "?subject=" + encodeURIComponent("Exclusive offer" + (title ? ": " + title : "")) +
+  "&body=" + encodeURIComponent("Hi, I'd like to make an offer for exclusive rights" + (title ? " to \"" + title + "\"" : "") + ".\n\nMy offer: $\nMy name:\n");
+function applySite() { $("mail").textContent = site.contact; $("mail").href = "mailto:" + site.contact; $("offerAny").href = offerLink();
   if (site.hero) document.documentElement.style.setProperty("--hero", `url("${site.hero.replace(/["\\]/g, "")}")`); }
 applySite();
 onSnapshot(doc(db, "settings", "site"), s => { site = { ...DEF }; const d = s.data() || {}; for (const k in d) if (d[k]) site[k] = d[k]; applySite(); }, () => {});
 const toast = t => { const e = $("toast"); e.textContent = t; e.className = "on"; setTimeout(() => e.className = "", 2200); };
 
-function watchBeats() {
-  if (unsubB) unsubB();
-  const col = collection(db, "beats");
-  unsubB = onSnapshot(isM() ? col : query(col, where("exclusive", "==", false)), snap => {
-    beats = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-    chips(); render();
-    const h = location.hash.slice(1), el = h && $(h); if (!hitDone && el && el.classList.contains("row")) { hitDone = true; el.classList.add("hit"); el.scrollIntoView({ block: "center" }); }
-  }, () => $("list").innerHTML = '<p class="empty">Could not load beats. Check your connection and refresh.</p>');
-}
-onAuthStateChanged(auth, u => {
-  member = null; if (unsubM) unsubM(); $("acctBtn").textContent = u ? "Account" : "Log in";
-  if (!u) { wasM = undefined; if ($("dAcct").open) $("dAcct").close(); return watchBeats(); }
-  unsubM = onSnapshot(doc(db, "members", u.uid), s => {
-    member = s.exists() ? s.data() : null;
-    if (isM() !== wasM) { wasM = isM(); watchBeats(); } else render();
-    if ($("dAcct").open) openAcct();
-  }, () => watchBeats());
-});
+onSnapshot(query(collection(db, "beats"), where("exclusive", "==", false)), snap => {
+  beats = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  chips(); render();
+  const h = location.hash.slice(1), el = h && $(h); if (!hitDone && el && el.classList.contains("row")) { hitDone = true; el.classList.add("hit"); el.scrollIntoView({ block: "center" }); }
+}, () => $("list").innerHTML = '<p class="empty">Could not load beats. Check your connection and refresh.</p>');
+let hitDone = false;
 
 function chips() {
   const t = ["All", ...new Set(beats.flatMap(b => (b.tags || "").split(",").map(x => x.trim()).filter(Boolean)))];
@@ -207,7 +224,6 @@ function chips() {
 }
 $("chips").onclick = e => { if (e.target.dataset.t) { tag = e.target.dataset.t; chips(); render(); } };
 $("q").oninput = render;
-const price = b => b.price ? +b.price : 60;
 
 function render() {
   const q = $("q").value.toLowerCase();
@@ -215,22 +231,16 @@ function render() {
   $("list").innerHTML = shown.length ? shown.map((b, i) => `
   <div class="row${cur === b.id ? " cur" : ""}" id="${esc(b.id)}">
     <button class="cv" data-p="${i}" aria-label="Play ${esc(b.title)}" ${b.coverUrl ? `style="background-image:url('${esc(b.coverUrl)}')"` : ""}>${b.coverUrl ? "" : "Y"}<b>${cur === b.id && !audio.paused ? "❚❚" : "▶"}</b></button>
-    <div class="info"><span class="t">${esc(b.title)}${b.exclusive ? '<em class="mb">Members</em>' : ""}</span><small>${esc(b.bpm || "-")} BPM · ${esc(b.tags)}</small></div>
+    <div class="info"><span class="t">${esc(b.title)}</span><small>${esc(b.bpm || "-")} BPM · ${esc(b.tags)}</small></div>
     <span class="c">${fmt(b.duration)}</span><span class="c">${esc(b.bpm || "-")}</span><span class="tg">${esc(b.tags)}</span>
-    <button class="ic" data-d="${i}" aria-label="Download sample of ${esc(b.title)}">${IC.dl}</button>
     <button class="ic" data-s="${i}" aria-label="Share ${esc(b.title)}">${IC.sh}</button>
-    <button class="buy" data-b="${i}">${usd(price(b))}</button>
+    <button class="buy" data-b="${i}">${usd(LIC[0][2])}</button>
   </div>`).join("") : '<p class="empty">No beats found. Try a different search.</p>';
 }
 
 $("list").onclick = e => {
   const t = e.target.closest("button"); if (!t) return; const d = t.dataset;
   if (d.p) play(shown[+d.p]);
-  if (d.d) { const b = shown[+d.d];
-    if (isM() && b.untaggedPath) return memberDl(b);
-    $("smT").textContent = "Sample download: " + b.title;
-    $("smB").innerHTML = isM() ? "<p>This beat has no free download. You can still license it.</p>" : '<p>Free downloads are available to Artist members.</p><br><a class="btn" href="#memberships" data-x>Compare membership plans</a>';
-    $("dSmp").showModal(); }
   if (d.s) share(shown[+d.s]);
   if (d.b) openLic(shown[+d.b]);
 };
@@ -243,9 +253,10 @@ async function share(b) {
 
 function openLic(b) {
   $("dLic").innerHTML = `<div class="dh"><h3>Choose contract type: ${esc(b.title)}</h3><button class="x" data-x aria-label="Close">×</button></div>` +
-    LIC.map((l, i) => `<div class="lic"><div><b>${l[0]}</b><small>${l[1]}</small></div><button class="buy" data-a="${i}">${usd(i ? l[2] : price(b))}</button></div>`).join("");
+    LIC.map((l, i) => `<div class="lic"><div><b>${l[0]}</b><small>${l[1]}</small></div>` +
+      (l[2] == null ? `<a class="buy" href="${esc(offerLink(b.title))}">Make an offer</a>` : `<button class="buy" data-a="${i}">${usd(l[2])}</button>`) + `</div>`).join("");
   $("dLic").onclick = e => { const a = e.target.dataset.a; if (a === undefined) return;
-    add({ id: b.id + "|" + a, title: b.title, lic: LIC[a][0], price: +a ? LIC[a][2] : price(b) }); $("dLic").close(); };
+    add({ id: b.id + "|" + a, title: b.title, lic: LIC[a][0], price: LIC[a][2] }); $("dLic").close(); };
   $("dLic").showModal();
 }
 
@@ -262,62 +273,6 @@ function openCart(msg) {
   if (!$("dCart").open) $("dCart").showModal();
 }
 $("cartBtn").onclick = () => openCart();
-$("join").onclick = () => { if (auth.currentUser) openAcct(); else { wantJoin = true; openAuth("up", "Create an account to join the Artist plan."); } };
-$("acctBtn").onclick = () => auth.currentUser ? openAcct() : openAuth("in");
-
-async function memberDl(b) {
-  if (member.downloadsLeft < 1) return toast("No downloads left. Contact the producer to renew.");
-  try {
-    const url = await getDownloadURL(ref(st, b.untaggedPath));
-    await updateDoc(doc(db, "members", auth.currentUser.uid), { downloadsLeft: member.downloadsLeft - 1 });
-    const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; a.click(); toast("Download started");
-  } catch { toast("Download failed. Try again."); }
-}
-
-function openAuth(mode, note) {
-  authMode = mode; const up = mode === "up";
-  $("dAuth").innerHTML = `<div class="dh"><h3>${up ? "Create account" : "Log in"}</h3><button class="x" data-x aria-label="Close">×</button></div>${note ? `<p>${note}</p>` : ""}
-    <input id="ae" type="email" placeholder="Email" autocomplete="email" aria-label="Email"><input id="ap" type="password" placeholder="Password" autocomplete="${up ? "new-password" : "current-password"}" aria-label="Password">
-    <p id="ar" class="err" role="alert"></p><button class="btn" style="width:100%" data-go>${up ? "Create account" : "Log in"}</button>
-    <p style="margin-top:14px;font-size:14px"><a href="#" data-sw>${up ? "I already have an account" : "Create an account"}</a>${up ? "" : ' · <a href="#" data-fg>Forgot password?</a>'}</p>`;
-  if (!$("dAuth").open) $("dAuth").showModal();
-}
-$("dAuth").onclick = async e => {
-  const d = e.target.dataset, r = $("ar");
-  if (d.sw !== undefined) { e.preventDefault(); openAuth(authMode === "up" ? "in" : "up"); }
-  if (d.fg !== undefined) { e.preventDefault(); const m = $("ae").value.trim(); r.className = "err";
-    if (!m) return r.textContent = "Enter your email first.";
-    try { await sendPasswordResetEmail(auth, m); r.className = ""; r.textContent = "Reset link sent. Check your email."; } catch { r.textContent = "Could not send the reset link."; } }
-  if (d.go !== undefined) {
-    const em = $("ae").value.trim(), pw = $("ap").value; r.className = "err";
-    if (!em || !pw) return r.textContent = "Enter your email and password.";
-    try {
-      authMode === "up" ? await createUserWithEmailAndPassword(auth, em, pw) : await signInWithEmailAndPassword(auth, em, pw);
-      $("dAuth").close(); toast(authMode === "up" ? "Account created" : "Welcome back");
-      if (wantJoin) { wantJoin = false; openAcct(); }
-    } catch (err) { r.textContent = ({ "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account. Log in instead.", "auth/weak-password": "Use a password with at least 6 characters.", "auth/invalid-email": "Enter a valid email." })[err.code] || "Something went wrong. Try again."; }
-  }
-};
-
-function openAcct() {
-  const u = auth.currentUser; if (!u) return openAuth("in");
-  const m = member;
-  let h = `<div class="dh"><h3>My account</h3><button class="x" data-x aria-label="Close">×</button></div><p>${esc(u.email)}</p>`;
-  if (!m) h += '<div class="note"><b>Artist plan: $35 per month</b><br>Request membership and the producer will contact you to arrange payment and activate it.</div><input id="mn" placeholder="Artist name" autocomplete="name" aria-label="Artist name"><button class="btn" data-j>Request membership</button>';
-  else if (m.status === "pending") h += '<div class="note">Your membership request is pending. The producer will contact you to arrange payment.</div>';
-  else if (m.status === "active") h += `<div class="note"><b>Artist member</b><br>${m.downloadsLeft} untagged downloads left. Use the download button on any beat.</div><h3 style="margin-top:16px;font-size:17px">Request a custom beat or mix and master</h3><select id="rt" aria-label="Request type"><option>Custom beat</option><option>Mix and master</option></select><textarea id="rn" rows="4" maxlength="1000" placeholder="Tell us what you need" aria-label="Request details"></textarea><button class="btn" data-q>Send request</button>`;
-  else h += `<div class="note">Your membership is ${esc(m.status)}. Contact the producer to rejoin.</div>`;
-  $("dAcct").innerHTML = h + '<br><button class="g" style="margin-top:14px" data-lo>Log out</button>';
-  if (!$("dAcct").open) $("dAcct").showModal();
-}
-$("dAcct").onclick = async e => {
-  const d = e.target.dataset, u = auth.currentUser;
-  if (d.lo !== undefined) { await signOut(auth); $("dAcct").close(); toast("Logged out"); }
-  if (d.j !== undefined) { const n = $("mn").value.trim(); if (!n) return toast("Enter your artist name");
-    try { await setDoc(doc(db, "members", u.uid), { email: u.email, name: n.slice(0, 80), plan: "Artist", status: "pending", downloadsLeft: 0, createdAt: serverTimestamp() }); toast("Request sent"); } catch { toast("Could not send. Try again."); } }
-  if (d.q !== undefined) { const n = $("rn").value.trim(); if (!n) return toast("Describe what you need");
-    try { await addDoc(collection(db, "requests"), { uid: u.uid, email: u.email, name: member.name, type: $("rt").value, notes: n, status: "new", createdAt: serverTimestamp() }); $("rn").value = ""; toast("Request sent to the producer"); } catch { toast("Could not send. Try again."); } }
-};
 $("dCart").onclick = async e => {
   const d = e.target.dataset;
   if (d.r) { cart.splice(+d.r, 1); saveCart(); openCart(); }
@@ -331,18 +286,15 @@ $("dCart").onclick = async e => {
 };
 document.addEventListener("click", e => { const x = e.target; if (x.matches("[data-x]")) x.closest("dialog").close(); else if (x.tagName === "DIALOG") x.close();
   if (x.dataset && x.dataset.info) { e.preventDefault(); const k = x.dataset.info;
-    $("dInfo").innerHTML = `<div class="dh"><h3>${x.textContent}</h3><button class="x" data-x aria-label="Close">×</button></div><p class="legal">${esc(site[k])}</p>`; $("dInfo").showModal(); } });
+    $("dInfo").innerHTML = `<div class="dh"><h3>${x.textContent}</h3><button class="x" data-x aria-label="Close">×</button></div>` + (LEGAL[k] ? LEGAL[k](esc(site.contact)) : `<p class="legal">${esc(site[k])}</p>`); $("dInfo").showModal(); } });
 saveCart();
 
 function play(b) {
   if (cur === b.id) { audio.paused ? audio.play() : audio.pause(); return; }
-  cur = b.id; audio.src = b.audioUrl; audio.play(); $("bar").hidden = false; $("now").textContent = b.title;
+  cur = b.id; audio.src = b.audioUrl; audio.play();
 }
-$("pp").onclick = () => audio.paused ? audio.play() : audio.pause();
-audio.onplay = audio.onpause = () => { $("pp").textContent = audio.paused ? "▶" : "❚❚"; render(); };
-audio.ontimeupdate = () => { $("seek").value = audio.duration ? audio.currentTime / audio.duration * 100 : 0; $("tm").textContent = fmt(audio.currentTime) + " / " + fmt(audio.duration); };
+audio.onplay = audio.onpause = () => render();
 audio.onended = () => { const i = shown.findIndex(b => b.id === cur); if (shown[i + 1]) play(shown[i + 1]); };
-$("seek").oninput = e => { if (audio.duration) audio.currentTime = e.target.value / 100 * audio.duration; };
 </script>
 </body>
 </html>
