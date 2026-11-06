@@ -89,7 +89,7 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 <header>
   <a class="logo" href="#top"><i>Y</i>YANASTAN</a>
   <nav><a href="#beats">Beats</a><a href="#licensing">Licensing</a><a href="#contact">Contact</a></nav>
-  <a class="adm" href="dashboard.html">Admin</a>
+  <a class="adm" href="admin.html">Admin</a>
   <button id="cartBtn" aria-label="Open cart"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/></svg><span id="ct">$0.00</span></button>
 </header>
 
@@ -143,11 +143,7 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getFirestore, collection, query, where, onSnapshot, addDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-
 const CONTACT = "info@yanastan.com"; // change to the producer's email
-const ADMIN_UIDS = []; // Firebase UIDs allowed into the dashboard, e.g. ["abc123..."]
-const ADMIN_EMAILS = []; // optional: Google emails allowed too. If both lists are empty, any Google account gets through.
 // [name, files included, price]. A null price means "make an offer".
 const LIC = [["MP3 & WAV","MP3 and WAV files",40],["Unlimited Stems","MP3, WAV and stems, unlimited use",200],["Exclusive","MP3, WAV and stems with exclusive rights",null]];
 const app = initializeApp({
@@ -158,7 +154,7 @@ const app = initializeApp({
   messagingSenderId: "188003047512",
   appId: "1:188003047512:web:dde20ba8b146b11df9922d"
 });
-const db = getFirestore(app), auth = getAuth(app);
+const db = getFirestore(app);
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = s => isFinite(s) && s ? Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0") : "0:00";
@@ -279,18 +275,6 @@ function openCart(msg) {
   if (!$("dCart").open) $("dCart").showModal();
 }
 $("cartBtn").onclick = () => openCart();
-document.querySelector(".adm").onclick = async e => {
-  e.preventDefault();
-  const ok = u => u && (!ADMIN_UIDS.length && !ADMIN_EMAILS.length || ADMIN_UIDS.includes(u.uid) || ADMIN_EMAILS.map(x => x.toLowerCase()).includes((u.email || "").toLowerCase()));
-  try {
-    const u = auth.currentUser || (await signInWithPopup(auth, new GoogleAuthProvider())).user;
-    if (ok(u)) location.href = "dashboard.html";
-    else { await signOut(auth); toast("That Google account is not an admin"); }
-  } catch (err) {
-    if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") return;
-    toast(err.code === "auth/unauthorized-domain" ? "Add this domain in Firebase Auth settings" : err.code === "auth/operation-not-allowed" ? "Turn on Google sign-in in Firebase" : "Google sign-in failed. Try again.");
-  }
-};
 $("dCart").onclick = async e => {
   const d = e.target.dataset;
   if (d.r) { cart.splice(+d.r, 1); saveCart(); openCart(); }
