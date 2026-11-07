@@ -61,6 +61,20 @@ footer{max-width:1100px;margin:60px auto 0;padding:24px 20px;border-top:1px soli
 footer a{display:block;margin:4px 0;text-decoration:none;color:var(--txt)}
 dialog{background:#120c0c;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:22px;width:min(560px,94vw);max-height:90vh;overflow:auto}
 dialog::backdrop{background:rgba(0,0,0,.75)}
+.seg{display:flex;gap:6px;background:#1a1313;border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:6px}
+.seg button{flex:1;background:none;border:0;color:var(--mute);padding:9px;border-radius:8px;font:inherit;font-weight:600}.seg button.on{background:var(--red);color:var(--gold)}
+.g2{background:none;border:1px solid var(--line);color:var(--txt);padding:10px 16px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}.g2:hover{border-color:var(--gold);color:var(--gold)}.g2.w{width:100%}
+.aerr{font-size:14px;min-height:20px;margin-top:10px;color:#ff6b6b}.aerr.ok{color:#6fbf8a}
+.me{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}.me small{display:block;color:var(--mute);font-weight:400}
+.ah{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin:20px 0 6px}
+.bu{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.bu:last-child{border:0}
+.cv{width:48px;height:48px;border-radius:8px;flex:none;background:linear-gradient(135deg,#7d0000,#2a0505) center/cover;display:grid;place-items:center;color:var(--gold)}
+.bd{flex:1;min-width:0}.pl{font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;border:1px solid var(--line);margin-left:8px;color:var(--gold)}
+.gr{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:10px 0 2px}
+.fl{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;background:#1a1313;border:1px solid var(--line);border-radius:8px;margin-top:5px;font-size:14px}.fl span{overflow-wrap:anywhere}
+.fl button{background:var(--red);color:var(--gold);border:0;border-radius:6px;padding:6px 12px;font:inherit;font-weight:600;cursor:pointer;flex:none}.fl button:disabled{opacity:.5}
+.st{font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;color:#6fbf8a;border:1px solid var(--line)}.st.new{background:var(--gold);color:#000;border-color:var(--gold)}
+.or{text-align:center;color:var(--mute);font-size:13px;margin:12px 0}.or a{color:var(--gold)}
 dialog.side{margin:0 0 0 auto;height:100vh;max-height:100vh;border-radius:0;width:min(400px,100vw)}
 .dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.dh h3{font-size:19px}
 .x{background:none;border:0;font-size:26px;line-height:1;color:var(--txt)}
@@ -97,7 +111,7 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 <header>
   <a class="logo" href="#top"><i>Y</i>YANASTAN</a>
   <nav><a href="#beats">Beats</a><a href="#licensing">Licensing</a><a href="#contact">Contact</a></nav>
-  <a class="adm" href="admin.html">Admin</a>
+  <a class="adm" id="acct" href="#">Sign in</a>
   <button id="cartBtn" aria-label="Open cart"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/></svg><span id="ct">$0.00</span></button>
 </header>
 
@@ -121,7 +135,7 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
   <h2>Licensing</h2>
   <div class="plans">
     <div class="plan"><h3>MP3 &amp; WAV</h3><div class="p">$40.00</div>
-      <ul><li>MP3 file</li><li>WAV file</li><li>Delivered by email after payment</li></ul>
+      <ul><li>MP3 file</li><li>WAV file</li><li>Download from your account</li></ul>
       <a class="btn" href="#beats">Browse beats</a></div>
     <div class="plan"><h3>Unlimited Stems</h3><div class="p">$200.00</div>
       <ul><li>MP3 and WAV files</li><li>Full stems</li><li>Unlimited use</li></ul>
@@ -145,12 +159,15 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 
 <dialog id="dLic"></dialog>
 <dialog id="dCart" class="side"></dialog>
+<dialog id="dAcct"></dialog>
 <dialog id="dInfo"></dialog>
 <div id="toast" role="status"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, query, where, onSnapshot, addDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+import { getFirestore, collection, query, where, onSnapshot, addDoc, getDocs, setDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const CONTACT = "info@yanastan.com"; // change to the producer's email
 // [name, files included, price]. A null price means "make an offer".
@@ -163,7 +180,13 @@ const app = initializeApp({
   messagingSenderId: "188003047512",
   appId: "1:188003047512:web:dde20ba8b146b11df9922d"
 });
-const db = getFirestore(app);
+const db = getFirestore(app), auth = getAuth(app), st = getStorage(app);
+let user = null;
+let mode = "in", accUnsubs = [], afterAuth = null;
+onAuthStateChanged(auth, u => { user = u; $("acct").textContent = u ? "My account" : "Sign in";
+  if (u && afterAuth) { const f = afterAuth; afterAuth = null; $("dAcct").close(); f(); }
+  else if ($("dAcct").open) renderAcct();
+  if ($("dCart").open) openCart(); });
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = s => isFinite(s) && s ? Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0") : "0:00";
@@ -174,7 +197,7 @@ const PAGE = 20;
 let beats = [], shown = [], cur = null, tag = "All", cart = [], limit = PAGE;
 try { cart = JSON.parse(localStorage.getItem("yc") || "[]"); } catch {}
 const DEF = { contact: CONTACT, hero: "",
-  licensing: "MP3 & WAV: $40.00. MP3 and WAV files.\nUnlimited Stems: $200.00. MP3, WAV and stems with unlimited use.\nExclusive: make an offer. MP3, WAV and stems with exclusive rights.\n\nFiles are delivered by email after payment is confirmed. Contact us for the full contract." };
+  licensing: "MP3 & WAV: $40.00. MP3 and WAV files.\nUnlimited Stems: $200.00. MP3, WAV and stems with unlimited use.\nExclusive: make an offer. MP3, WAV and stems with exclusive rights.\n\nYour files appear in your account for download once payment is confirmed. Contact us for the full contract." };
 
 const L = (title, eff, parts) => `<div class="doc"><p class="eff">Effective date: ${eff}</p>${parts}</div>`;
 const sec = (h, ...ps) => `<h4>${h}</h4>` + ps.map(p => Array.isArray(p) ? "<ul>" + p.map(i => `<li>${i}</li>`).join("") + "</ul>" : `<p>${p}</p>`).join("");
@@ -182,7 +205,7 @@ const LEGAL = {
   terms: m => L("Terms", "November 5, 2026",
     `<p>Yanastan Entertainment ("Website", "us", "we" or "our") operates this website and related services (the "Service"). These Terms and Conditions govern your use of the Service and may change from time to time. "You" means an individual, or the business or group you represent.</p><p><b>Please read these terms carefully. By using the Website or related services you agree to be bound by them.</b></p>` +
     sec("Use of materials on the Website", "The information, artwork, text, video, audio, pictures, software and other intellectual property (the \"Materials\") on the Website are protected by copyright and international law. You may access and use the Materials for personal or educational purposes, or as expressly allowed in these terms or in a license you have purchased. You may not otherwise reproduce, distribute, publicly perform, publicly display, modify or create derivative works of the Materials without permission from the copyright owner. You may not link directly to any media file on the Website server, and you may not claim any Materials as your own work. To use our logos, contact us at " + m + ".") +
-    sec("Licenses and purchases", "Beats are licensed, not sold, unless you buy an Exclusive license. Licenses are granted after payment is received. After you place an order we will email you a payment link, and we deliver your files by email once payment is confirmed.", "MP3 &amp; WAV: MP3 and WAV files. Unlimited Stems: MP3, WAV and stems with unlimited use. Exclusive: MP3, WAV and stems with exclusive rights, priced by offer and agreed with us directly.", "Beats may not be resold or redistributed as instrumentals. Buyers are responsible for clearing any samples in a composition they purchase.") +
+    sec("Licenses and purchases", "Beats are licensed, not sold, unless you buy an Exclusive license. Licenses are granted after payment is received. After you place an order from your account we will send you payment instructions, and your files unlock in your account for download once payment is confirmed.", "MP3 &amp; WAV: MP3 and WAV files. Unlimited Stems: MP3, WAV and stems with unlimited use. Exclusive: MP3, WAV and stems with exclusive rights, priced by offer and agreed with us directly.", "Beats may not be resold or redistributed as instrumentals. Buyers are responsible for clearing any samples in a composition they purchase.") +
     sec("Copyright and trademark infringement", "All compositions, sound recordings, art and other written or visual images (the \"Content\") are posted by us, and we represent that neither the Content nor the names under which it is promoted infringe any third party's rights. If you believe any Content or name on the Website is used in violation of your rights, email " + m + " with details. After receiving written notice we will, in most cases, either remove the Content or name from the pages identified or remove those pages entirely.") +
     sec("Refund policy", "We do not offer refunds. If there is a problem with an order, contact " + m + " immediately and we will aim to solve it amicably. No refund will be given if a user violates these terms or a license agreement.") +
     sec("Your conduct", "You shall use the Website for lawful purposes only. You shall not post or transmit any material that infringes the rights of others, or that is unlawful, threatening, abusive, defamatory, invasive of privacy, obscene or otherwise objectionable, or that without our prior approval contains advertising or solicitation. If we believe a user abuses the Website, including possible copyright infringement, libel or slander, or payment fraud, we may share certain information with third parties as described in our Privacy Policy. We reserve the right to refuse service and cancel orders at our sole discretion.") +
@@ -195,14 +218,14 @@ const LEGAL = {
   privacy: m => L("Privacy", "November 5, 2026",
     `<p>Yanastan Entertainment ("Website", "us", "we" or "our") is committed to protecting your privacy online. This policy explains what personal data we collect when you use our website and related services (the "Service"), how we use it, and the choices you have. By using the Service you agree to the collection and use of information as described here.</p>` +
     sec("Definitions", "<b>Personal Data</b> is data about a living individual who can be identified from it. <b>Usage Data</b> is data collected automatically when you use the Service, such as the duration of a page visit. <b>Cookies</b> and similar storage are small pieces of data stored on your device. We are the <b>Data Controller</b> of your data, and the <b>Service Providers</b> we use are Data Processors that handle data on our behalf.") +
-    sec("Information we collect", "While using the Service we may ask you for information that can be used to contact or identify you, such as:", ["Email address (required to place an order)", "Name, if you give it when making an offer or contacting us", "Order details: the beats and licenses in your order and the total", "Any message or offer you send us by email"],
+    sec("Information we collect", "While using the Service we may ask you for information that can be used to contact or identify you, such as:", ["Account details: name and email address (required to place an order)", "Name, if you give it when making an offer or contacting us", "Order details: the beats and licenses in your order and the total", "Any message or offer you send us by email"],
       "We may use your email to reply to your order or offer, and to send updates about our beats. You can opt out of marketing emails at any time by following the instructions in the email or by contacting us.") +
     sec("Usage Data", "Our hosting and technology providers may automatically receive information your browser sends, such as your IP address, browser type and version, the pages you visit, the time and date of your visit, the time spent on pages, device identifiers and other diagnostic data. On mobile this can include your device type and operating system.") +
     sec("Cookies and local storage", "We store your shopping cart in your browser's local storage so it is still there when you come back. You can clear it at any time in your browser settings. Browsers may also let you refuse cookies, but parts of the Service may not work if you do.") +
-    sec("How we use your data", ["To provide and maintain the Service and process your orders and offers", "To email you payment links and deliver your files", "To provide customer support", "To notify you about changes to the Service or new releases", "To monitor usage and detect, prevent and address technical issues", "To protect against abuse, including copyright infringement and payment fraud"]) +
+    sec("How we use your data", ["To provide and maintain the Service and process your orders and offers", "To send you payment instructions and unlock your files in your account", "To provide customer support", "To notify you about changes to the Service or new releases", "To monitor usage and detect, prevent and address technical issues", "To protect against abuse, including copyright infringement and payment fraud"]) +
     sec("Sharing of data", "We do not sell, rent or trade your personal information. We may share the information needed to complete your transaction with third parties who help us, such as payment providers, and we work to disclose only what is necessary. This policy does not apply to those third parties. If we believe a user abuses the Website, we reserve the right to share certain information with third parties.") +
     sec("Service providers", "We use Google Firebase to store orders and site data and to host parts of the Service. These providers have access to your data only to perform tasks for us and are obligated not to use it for other purposes.") +
-    sec("Payments", "We do not collect or store your payment card details on this website. Payment is arranged by email, and card details are handled by the payment processor you use, under its own privacy policy.") +
+    sec("Payments", "We do not collect or store your payment card details on this website. Payment is arranged with you directly, and card details are handled by the payment processor you use, under its own privacy policy.") +
     sec("Retention of data", "We keep your personal data only as long as needed for the purposes in this policy, to meet legal obligations, resolve disputes and enforce our agreements. Usage Data is generally kept for a shorter time unless needed for security or to improve the Service.") +
     sec("Transfer of data", "Your information may be transferred to, and kept on, computers outside your country where data protection laws may differ. By submitting information you agree to that transfer. We take reasonable steps to make sure your data is treated securely and in line with this policy.") +
     sec("Disclosure of data", "If we are involved in a merger, acquisition or asset sale, your data may be transferred and we will give notice first. We may disclose your data if required by law or valid requests from public authorities, or in good faith to comply with a legal obligation, protect our rights or property, investigate wrongdoing, protect the safety of users or the public, or protect against legal liability.") +
@@ -271,7 +294,7 @@ function openLic(b) {
     LIC.map((l, i) => `<div class="lic"><div><b>${l[0]}</b><small>${l[1]}</small></div>` +
       (l[2] == null ? `<a class="buy" href="${esc(offerLink(b.title))}">Make an offer</a>` : `<button class="buy" data-a="${i}">${usd(l[2])}</button>`) + `</div>`).join("");
   $("dLic").onclick = e => { const a = e.target.dataset.a; if (a === undefined) return;
-    add({ id: b.id + "|" + a, title: b.title, lic: LIC[a][0], price: LIC[a][2] }); $("dLic").close(); };
+    add({ id: b.id + "|" + a, title: b.title, lic: LIC[a][0], price: LIC[a][2], cover: b.coverUrl || "" }); $("dLic").close(); };
   $("dLic").showModal();
 }
 
@@ -284,25 +307,108 @@ function openCart(msg) {
   const tot = cart.reduce((s, c) => s + c.price, 0);
   $("dCart").innerHTML = `<div class="dh"><h3>Your cart</h3><button class="x" data-x aria-label="Close">×</button></div>` + (msg ? `<p>${msg}</p>` : cart.length ? cart.map((c, i) =>
     `<div class="ci"><div><b>${esc(c.title)}</b><small>${esc(c.lic)}</small><button data-r="${i}">Remove</button></div><b>${usd(c.price)}</b></div>`).join("") +
-    `<div class="tot"><span>Total</span><span>${usd(tot)}</span></div><input id="em" type="email" placeholder="Your email" autocomplete="email" aria-label="Your email"><button class="btn" style="width:100%" data-o>Place order</button><p style="color:var(--mute);font-size:13px;margin-top:10px">The producer will email you a payment link and your files.</p>` : '<p class="empty">Your cart is empty. Add a beat to get started.</p>');
+    `<div class="tot"><span>Total</span><span>${usd(tot)}</span></div>${user ? `<p style="color:var(--mute);font-size:13px;margin:12px 0 0">Ordering as ${esc(user.email)}</p><button class="btn" style="width:100%;margin-top:10px" data-o>Place order</button>` : `<button class="btn" style="width:100%;margin-top:14px" data-si>Sign in or create account to order</button>`}<p style="color:var(--mute);font-size:13px;margin-top:10px">We will send you payment instructions. Once payment is confirmed, your files unlock in your account for download.</p>` : '<p class="empty">Your cart is empty. Add a beat to get started.</p>');
   if (!$("dCart").open) $("dCart").showModal();
 }
 $("cartBtn").onclick = () => openCart();
 $("dCart").onclick = async e => {
   const d = e.target.dataset;
+  if (d.si) { $("dCart").close(); openAcct(() => openCart()); }
   if (d.r) { cart.splice(+d.r, 1); saveCart(); openCart(); }
   if (d.o) {
-    const em = $("em").value.trim(); if (!/^\S+@\S+\.\S+$/.test(em)) return toast("Enter a valid email");
+    if (!user) return toast("Please sign in first");
     e.target.disabled = true;
-    try { await addDoc(collection(db, "orders"), { email: em, items: cart, total: cart.reduce((s, c) => s + c.price, 0), status: "new", createdAt: serverTimestamp() });
-      cart = []; saveCart(); openCart("Order received. Check your email soon for payment details."); }
+    try { await addDoc(collection(db, "orders"), { uid: user.uid, email: user.email, name: user.displayName || "", items: cart, total: cart.reduce((s, c) => s + c.price, 0), status: "new", createdAt: serverTimestamp() });
+      cart = []; saveCart(); openCart('Order received. We will send payment instructions to ' + esc(user.email) + '. Once payment is confirmed your files unlock in <a href="#" data-acct style="color:var(--gold)">your account</a>.'); }
     catch { e.target.disabled = false; toast("Could not send order. Try again."); }
   }
 };
-document.addEventListener("click", e => { const x = e.target; if (x.matches("[data-x]")) x.closest("dialog").close(); else if (x.tagName === "DIALOG") x.close();
+document.addEventListener("click", e => { const x = e.target; if (x.dataset && x.dataset.acct !== undefined) { e.preventDefault(); $("dCart").close(); openAcct(); return; } if (x.matches("[data-x]")) x.closest("dialog").close(); else if (x.tagName === "DIALOG") x.close();
   if (x.dataset && x.dataset.info) { e.preventDefault(); const k = x.dataset.info;
     $("dInfo").innerHTML = `<div class="dh"><h3>${x.textContent}</h3><button class="x" data-x aria-label="Close">×</button></div>` + (LEGAL[k] ? LEGAL[k](esc(site.contact)) : `<p class="legal">${esc(site[k])}</p>`); $("dInfo").showModal(); } });
 saveCart();
+
+
+/* ---------- customer account ---------- */
+const ERR = { "auth/invalid-credential": "Wrong email or password.", "auth/wrong-password": "Wrong email or password.", "auth/user-not-found": "Wrong email or password.",
+  "auth/email-already-in-use": "An account with this email already exists. Try signing in.", "auth/weak-password": "Password must be at least 6 characters.",
+  "auth/invalid-email": "Enter a valid email address.", "auth/too-many-requests": "Too many attempts. Wait a moment and try again.",
+  "auth/network-request-failed": "Network error. Check your connection.", "auth/unauthorized-domain": "This domain is not authorised in Firebase Authentication.",
+  "auth/operation-not-allowed": "This sign-in method is not turned on in Firebase Authentication." };
+const aerr = (e, ok) => { const el = $("aerr"); if (!el) return; el.textContent = typeof e === "string" ? e : (ERR[e.code] || "Something went wrong. Try again."); el.className = "aerr" + (ok ? " ok" : ""); };
+const LV = { 1: "MP3 & WAV", 2: "Unlimited Stems", 3: "Exclusive" };
+const bytes = n => n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+const when = t => t?.seconds ? new Date(t.seconds * 1000).toLocaleDateString() : "";
+
+function openAcct(then) { afterAuth = then || null; renderAcct(); if (!$("dAcct").open) $("dAcct").showModal(); }
+function renderAcct() {
+  accUnsubs.forEach(f => f()); accUnsubs = []; const d = $("dAcct");
+  if (!user) {
+    const up = mode === "up";
+    d.innerHTML = `<div class="dh"><h3>${up ? "Create account" : "Sign in"}</h3><button class="x" data-x aria-label="Close">×</button></div>
+      <div class="seg"><button data-m="in" class="${up ? "" : "on"}">Sign in</button><button data-m="up" class="${up ? "on" : ""}">Create account</button></div>
+      <form id="af" novalidate>${up ? '<input id="anm" placeholder="Name" autocomplete="name" aria-label="Name">' : ""}
+      <input id="aem" type="email" placeholder="Email" autocomplete="email" aria-label="Email"><input id="apw" type="password" placeholder="Password" autocomplete="${up ? "new-password" : "current-password"}" aria-label="Password">
+      <button class="btn" style="width:100%" id="ago">${up ? "Create account" : "Sign in"}</button></form>
+      <p class="or"><a href="#" data-forgot>Forgot password?</a></p><button class="g2 w" type="button" data-g>Continue with Google</button><p class="aerr" id="aerr" role="alert"></p>`;
+    return;
+  }
+  d.innerHTML = `<div class="dh"><h3>My account</h3><button class="x" data-x aria-label="Close">×</button></div>
+    <div class="me"><div><b>${esc(user.displayName || "Welcome")}</b><small>${esc(user.email)}</small></div><div><button class="g2" data-reset>Reset password</button> <button class="g2" data-out>Sign out</button></div></div>
+    <p class="aerr" id="aerr" role="alert" style="margin:4px 0 0"></p>
+    <div class="ah">My purchases</div><div id="buys"><p class="empty">Loading…</p></div><div class="ah">Orders</div><div id="ords"><p class="empty">Loading…</p></div>`;
+  accUnsubs.push(onSnapshot(collection(db, "users", user.uid, "purchases"), s => renderBuys(s.docs.map(x => ({ id: x.id, ...x.data() }))),
+    () => { $("buys") && ($("buys").innerHTML = '<p class="empty">Could not load purchases. Refresh and try again.</p>'); }));
+  accUnsubs.push(onSnapshot(query(collection(db, "orders"), where("uid", "==", user.uid)), s => renderOrds(s.docs.map(x => ({ id: x.id, ...x.data() }))),
+    () => { $("ords") && ($("ords").innerHTML = '<p class="empty">Could not load orders.</p>'); }));
+}
+async function renderBuys(L) {
+  L.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  if (!L.length) { $("buys").innerHTML = '<p class="empty">No purchases yet. Once your order is paid, your beats and files appear here.</p>'; return; }
+  const html = await Promise.all(L.map(async p => {
+    let fs = []; try { fs = (await getDocs(collection(db, "beats", p.beatId, "files"))).docs.map(x => x.data()); } catch {}
+    fs = fs.filter(f => f.tier === "basic" || p.level >= 2).sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+    const grp = (t, n) => { const g = fs.filter(f => f.tier === t); return g.length ? `<div class="gr">${n}</div>` + g.map(f => `<div class="fl"><span>${esc(f.title)} <small style="color:var(--mute)">${bytes(f.size || 0)}</small></span><button data-dl="${esc(f.path)}">Download</button></div>`).join("") : ""; };
+    return `<div class="bu"><div class="cv" ${p.cover ? `style="background-image:url('${esc(p.cover)}')"` : ""}>${p.cover ? "" : "♪"}</div><div class="bd"><b>${esc(p.title)}</b><span class="pl">${esc(LV[p.level] || p.license)}</span>
+      ${grp("basic", "MP3 &amp; WAV")}${grp("stems", "Stems")}${fs.length ? "" : '<p class="empty" style="padding:8px 0">Files are being added. Check back soon.</p>'}</div></div>`;
+  }));
+  if ($("buys")) $("buys").innerHTML = html.join("");
+}
+function renderOrds(L) {
+  L.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  if ($("ords")) $("ords").innerHTML = L.map(o => `<div class="ci"><div><b>${(o.items || []).map(i => esc(i.title)).join(", ")}</b><small>${(o.items || []).map(i => esc(i.lic)).join(", ")} · ${when(o.createdAt)}</small></div>
+    <div style="text-align:right"><b>${usd(o.total)}</b><br><span class="st ${o.status === "paid" ? "" : "new"}">${o.status === "paid" ? "Paid" : "Awaiting payment"}</span></div></div>`).join("") || '<p class="empty">No orders yet.</p>';
+}
+$("acct").onclick = e => { e.preventDefault(); openAcct(); };
+$("dAcct").onclick = async e => {
+  const d = e.target.dataset;
+  if (d.m) { mode = d.m; renderAcct(); }
+  if (d.out) await signOut(auth);
+  if (d.reset) { try { await sendPasswordResetEmail(auth, user.email); aerr("Password reset link sent to " + user.email + ".", true); } catch (err) { aerr(err); } }
+  if (d.forgot !== undefined) { e.preventDefault(); const em = $("aem").value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(em)) return aerr("Type your email above first, then tap Forgot password.");
+    try { await sendPasswordResetEmail(auth, em); aerr("If an account exists for that email, a reset link is on its way.", true); } catch (err) { aerr(err); } }
+  if (d.g !== undefined) { aerr("");
+    try { const c = await signInWithPopup(auth, new GoogleAuthProvider());
+      await setDoc(doc(db, "users", c.user.uid), { name: c.user.displayName || "", email: c.user.email, createdAt: serverTimestamp() }, { merge: true });
+    } catch (err) { if (err.code !== "auth/popup-closed-by-user" && err.code !== "auth/cancelled-popup-request") aerr(err.code === "auth/popup-blocked" ? "Your browser blocked the popup. Allow popups and try again." : err); } }
+  if (d.dl) { const b = e.target; b.disabled = true; const t = b.textContent; b.textContent = "Preparing…";
+    try { location.assign(await getDownloadURL(ref(st, d.dl))); } catch { aerr("Download failed. Make sure you are signed in and try again."); }
+    setTimeout(() => { b.disabled = false; b.textContent = t; }, 1500); }
+};
+$("dAcct").onsubmit = async e => {
+  e.preventDefault(); const em = $("aem").value.trim(), pw = $("apw").value;
+  if (!/^\S+@\S+\.\S+$/.test(em)) return aerr("Enter a valid email address.");
+  if (pw.length < 6) return aerr("Password must be at least 6 characters.");
+  $("ago").disabled = true; aerr("");
+  try {
+    if (mode === "up") { const nm = $("anm").value.trim(); const c = await createUserWithEmailAndPassword(auth, em, pw);
+      if (nm) await updateProfile(c.user, { displayName: nm });
+      await setDoc(doc(db, "users", c.user.uid), { name: nm, email: em, createdAt: serverTimestamp() }, { merge: true });
+      user = auth.currentUser; if ($("dAcct").open) renderAcct(); }
+    else await signInWithEmailAndPassword(auth, em, pw);
+  } catch (err) { aerr(err); if ($("ago")) $("ago").disabled = false; }
+};
 
 function play(b) {
   if (cur === b.id) { audio.paused ? audio.play() : audio.pause(); return; }

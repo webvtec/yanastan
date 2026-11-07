@@ -57,6 +57,18 @@ button:disabled{opacity:.5;cursor:wait}
 .pill{display:inline-block;font-size:12px;padding:1px 9px;border-radius:20px;border:1px solid var(--line);margin-left:6px;color:var(--mute)}.pill.ok{color:var(--ok);border-color:rgba(111,191,138,.35)}.pill.no{color:#ff9a6b;border-color:rgba(255,154,107,.35)}
 #msg{min-height:20px;color:var(--gold);font-size:14px}.err{color:#ff6b6b!important}
 .empty{color:var(--mute);text-align:center;padding:28px 0}
+.pl{display:grid;gap:8px;margin:0 0 14px}
+dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:22px;width:min(680px,95vw);max-height:92vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.75)}
+.dh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}.dh h2{margin:0}
+.sec{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.sec h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.fr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;margin-bottom:8px;padding:8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+.fr input{padding:8px 10px}.fr small{color:var(--mute);font-weight:400;white-space:nowrap}
+.fr .nm{grid-column:1/-1;color:var(--mute);font-size:12px;overflow-wrap:anywhere}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;grid-column:1/-1}.bar i{display:block;height:100%;width:0;background:var(--gold)}
+.plus{width:100%;border:1px dashed var(--line);background:none;color:var(--gold);padding:11px}.plus:hover{border-color:var(--gold);background:var(--panel2)}
+@media(max-width:640px){.fr{grid-template-columns:1fr auto}.fr small{display:none}dialog{padding:16px}}
 @media(max-width:640px){form,.grid{grid-template-columns:1fr}header{padding:12px 16px}.card{padding:18px}.tabs{width:100%}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -86,9 +98,8 @@ button:disabled{opacity:.5;cursor:wait}
           <label>Tags <span class="hint">Separate with commas</span><input id="tags" placeholder="Dancehall, type beat"></label>
           <label>MP3 lease price (USD) <span class="hint">Leave blank for $60</span><input id="price" type="number" min="0" step="0.01"></label>
           <label class="full">Preview audio <span class="hint">The clip visitors hear on the site</span><input id="file" type="file" accept="audio/*"></label>
-          <label class="full">Full audio file to sell <span class="hint">Private. This is what customers pay for and it is never played on the site</span><input id="paid" type="file" accept="audio/*"></label>
           <label class="full">Cover image <span class="hint">Optional</span><input id="cover" type="file" accept="image/*"></label>
-          <div class="full"><button id="add">Publish beat</button></div>
+          <div class="full"><button id="add">Publish beat</button> <span class="hint">Next you will add the MP3, WAV and stem files customers download.</span></div>
           <p class="full" id="msg"></p>
         </form>
       </div>
@@ -101,11 +112,13 @@ button:disabled{opacity:.5;cursor:wait}
   </div>
 </section>
 
+<dialog id="dFiles"></dialog>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
 const ADMIN_EMAIL = "YOUR_ADMIN_EMAIL_HERE"; // the producer's Google email, same as in the rules
 const ADMIN_UID = "BBS0vo8W1sdJ118GCJdAF63Q7eC3"; // optional: the producer's Firebase UID (Authentication > Users). If set, it is checked instead of the email.
@@ -122,7 +135,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const say = (t, bad) => { $("msg").textContent = t; $("msg").className = bad ? "err" : ""; };
 const day = t => t?.seconds ? new Date(t.seconds * 1000).toLocaleDateString() : "";
-let unsubs = [];
+let unsubs = [], orderMap = {}, fileUnsub = null, fileBeat = null, staged = { basic: [], stems: [] };
 
 const watch = (name, fn) => onSnapshot(query(collection(db, name), orderBy("createdAt", "desc")), s => fn(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 const none = t => `<p class="empty">${t}</p>`;
@@ -137,17 +150,21 @@ onAuthStateChanged(auth, u => {
   unsubs.push(watch("beats", L => {
     $("n").textContent = L.length;
     $("list").innerHTML = L.map(b => `<div class="row">${b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="">` : `<div class="ph">♪</div>`}
-      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"}<span class="pill ${b.untaggedPath ? "ok" : "no"}">${b.untaggedPath ? "Paid file uploaded" : "No paid file yet"}</span></small></div>
+      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"}<span class="pill ${(b.nBasic || 0) + (b.nStems || 0) ? "ok" : "no"}">${b.nBasic || 0} MP3/WAV · ${b.nStems || 0} stems</span></small></div>
+      <button data-f="${b.id}" data-t="${esc(b.title)}">Files</button>
       <button class="g" data-e="${b.id}" data-t="${esc(b.title)}" data-b="${esc(b.bpm)}" data-p="${esc(b.price)}">Edit</button>
       <button class="g del" data-d="${b.id}">Delete</button></div>`).join("") || none("No beats yet. Add your first one above.");
   }));
 
   unsubs.push(watch("orders", L => {
     $("oc").textContent = L.filter(o => o.status === "new").length || "";
-    $("orders").innerHTML = L.map(o => `<div class="row"><div class="m"><b>${esc(o.email)}</b><small>${(o.items || []).map(i => esc(i.title) + " (" + esc(i.lic) + ")").join(", ")} · ${day(o.createdAt)}</small></div>
-      <b class="amt">$${Number(o.total).toFixed(2)}</b><span class="tag ${o.status === "new" ? "hot" : ""}">${esc(o.status)}</span>
-      <button class="g" data-os="${o.id}" data-s="${o.status === "new" ? "done" : "new"}">${o.status === "new" ? "Mark done" : "Reopen"}</button>
-      <button class="g del" data-od="${o.id}">Delete</button></div>`).join("") || none("No orders yet.");
+    $("orders").innerHTML = L.map(o => { const paid = o.status === "paid";
+      return `<div class="row"><div class="m"><b>${esc(o.name || o.email)}</b><small>${esc(o.email)} · ${day(o.createdAt)}${o.uid ? "" : " · guest order, no account"}</small>
+      <small>${(o.items || []).map(i => esc(i.title) + " (" + esc(i.lic) + ")").join(", ")}</small></div>
+      <b class="amt">$${Number(o.total).toFixed(2)}</b><span class="tag ${paid ? "" : "hot"}">${paid ? "paid" : "awaiting payment"}</span>
+      ${paid ? `<button class="g" data-ov="${o.id}">Revoke access</button>` : o.uid ? `<button data-op="${o.id}">Mark paid &amp; unlock</button>` : `<button class="g" data-os="${o.id}" data-s="${o.status === "new" ? "done" : "new"}">${o.status === "new" ? "Mark done" : "Reopen"}</button>`}
+      <button class="g del" data-od="${o.id}">Delete</button></div>`; }).join("") || none("No orders yet.");
+    orderMap = Object.fromEntries(L.map(o => [o.id, o]));
   }));
 
   unsubs.push(watch("requests", L => {
@@ -184,17 +201,18 @@ async function upload(folder, f, label) {
 
 $("af").onsubmit = async e => {
   e.preventDefault();
-  const f = $("file").files[0], c = $("cover").files[0], p = $("paid").files[0];
+  const f = $("file").files[0], c = $("cover").files[0];
   if (!f) return say("Choose a preview audio file.", true);
   $("add").disabled = true;
   try {
     const dur = await duration(URL.createObjectURL(f));
     const audioUrl = await getDownloadURL(await upload("beats", f, "preview"));
-    const untaggedPath = p ? (await upload("untagged", p, "paid file")).fullPath : "";
     const coverUrl = c ? await getDownloadURL(await upload("covers", c, "cover")) : "";
-    await addDoc(collection(db, "beats"), { title: $("title").value.trim(), bpm: +$("bpm").value || 0, tags: $("tags").value.trim() || "Dancehall",
-      price: $("price").value || "", audioUrl, coverUrl, untaggedPath, exclusive: false, duration: dur, createdAt: serverTimestamp() });
-    $("af").reset(); say("Published. It is live on the site.");
+    const title = $("title").value.trim();
+    const r = await addDoc(collection(db, "beats"), { title, bpm: +$("bpm").value || 0, tags: $("tags").value.trim() || "Dancehall",
+      price: $("price").value || "", audioUrl, coverUrl, exclusive: false, duration: dur, nBasic: 0, nStems: 0, createdAt: serverTimestamp() });
+    $("af").reset(); say("Published. It is live on the site. Now add the downloadable files.");
+    openFiles(r.id, title);
   } catch (err) { say("Failed: " + err.message, true); }
   $("add").disabled = false;
 };
@@ -202,7 +220,14 @@ $("af").onsubmit = async e => {
 document.addEventListener("click", async e => {
   const d = e.target.dataset; if (!e.target.closest("button")) return;
   try {
-    if (d.d && confirm("Delete this beat?")) await deleteDoc(doc(db, "beats", d.d));
+    if (d.f) openFiles(d.f, d.t);
+    if (d.d && confirm("Delete this beat and all its files? Customers who bought it will lose their downloads.")) {
+      const fs = await getDocs(collection(db, "beats", d.d, "files"));
+      for (const x of fs.docs) { try { await deleteObject(ref(st, x.data().path)); } catch {} await deleteDoc(x.ref); }
+      await deleteDoc(doc(db, "beats", d.d));
+    }
+    if (d.op) await grant(orderMap[d.op]);
+    if (d.ov && confirm("Revoke this customer's access and reopen the order?")) await revoke(orderMap[d.ov]);
     if (d.e) {
       const title = prompt("Title", d.t); if (title === null) return;
       const bpm = prompt("BPM", d.b); if (bpm === null) return;
@@ -215,6 +240,103 @@ document.addEventListener("click", async e => {
     if (d.rd && confirm("Delete this request?")) await deleteDoc(doc(db, "requests", d.rd));
   } catch (err) { alert("Failed: " + err.message); }
 });
+
+/* ---------- orders: unlock / revoke purchases ---------- */
+const LEVEL = { "MP3 & WAV": 1, "Unlimited Stems": 2, "Exclusive": 3 };
+async function grant(o) {
+  if (!o?.uid) return alert("This order has no customer account.");
+  if (!confirm(`Confirm you received $${Number(o.total).toFixed(2)} from ${o.email}? Their files unlock immediately.`)) return;
+  const b = writeBatch(db);
+  const best = {};
+  for (const i of o.items || []) { const id = i.id.split("|")[0]; const lv = LEVEL[i.lic] || 1; if (!best[id] || lv > best[id].level) best[id] = { level: lv, i }; }
+  for (const id in best) {
+    const pr = doc(db, "users", o.uid, "purchases", id), old = await getDoc(pr);
+    if (old.exists() && old.data().level >= best[id].level) continue;
+    b.set(pr, { beatId: id, title: best[id].i.title, cover: best[id].i.cover || "", license: best[id].i.lic, level: best[id].level, orderId: o.id, createdAt: serverTimestamp() });
+  }
+  b.update(doc(db, "orders", o.id), { status: "paid", paidAt: serverTimestamp() });
+  await b.commit();
+}
+async function revoke(o) {
+  const b = writeBatch(db);
+  for (const i of o.items || []) { const id = i.id.split("|")[0], pr = doc(db, "users", o.uid, "purchases", id), s = await getDoc(pr);
+    if (s.exists() && s.data().orderId === o.id) b.delete(pr); }
+  b.update(doc(db, "orders", o.id), { status: "new" });
+  await b.commit();
+}
+
+/* ---------- file manager (MP3/WAV + stems, many files per beat) ---------- */
+const TIERS = [["basic", "MP3 & WAV files", "Included with every license"], ["stems", "Stems", "Only for Unlimited Stems and Exclusive buyers"]];
+const sz = n => n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+const base = n => n.replace(/\.[^.]+$/, "");
+const ext = n => (n.match(/\.[^.]+$/) || [""])[0];
+const fsafe = n => n.replace(/[^\w. -]/g, "_").trim() || "file";
+
+function openFiles(id, title) {
+  fileBeat = id; staged = { basic: [], stems: [] };
+  $("dFiles").innerHTML = `<div class="dh"><h2>Files: ${esc(title)}</h2><button class="g" data-fx>Close</button></div>
+    <p class="hint">Add as many files as you need, give each a clear title, then press Upload. Customers see these titles.</p>` +
+    TIERS.map(([t, name, hint]) => `<div class="sec"><h3>${name} <span class="ct" id="c-${t}">0</span></h3><p class="hint" style="margin-bottom:10px">${hint}</p>
+      <div id="live-${t}"></div><div id="stg-${t}"></div>
+      <button class="plus" data-add="${t}">+ Add file</button>
+      <button id="up-${t}" data-up="${t}" hidden style="margin-top:10px;width:100%"></button></div>`).join("") +
+    `<input id="pick" type="file" multiple hidden>`;
+  $("dFiles").showModal();
+  fileUnsub && fileUnsub();
+  fileUnsub = onSnapshot(collection(db, "beats", id, "files"), s => {
+    const L = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    TIERS.forEach(([t]) => { const g = L.filter(f => f.tier === t).sort((a, b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
+      $("c-" + t).textContent = g.length;
+      $("live-" + t).innerHTML = g.map(f => `<div class="fr"><input value="${esc(f.title)}" data-rn="${f.id}" aria-label="File title"><small>${sz(f.size || 0)}</small>
+        <button class="g del" data-rm="${f.id}" data-p="${esc(f.path)}">Remove</button><div class="nm">${esc(f.name)}</div></div>`).join(""); });
+  });
+}
+const closeFiles = () => { fileUnsub && fileUnsub(); fileUnsub = null; $("dFiles").close(); };
+$("dFiles").addEventListener("close", () => { fileUnsub && fileUnsub(); fileUnsub = null; });
+
+function drawStaged(t) {
+  $("stg-" + t).innerHTML = staged[t].map((f, i) => `<div class="fr" id="s-${t}-${i}"><input value="${esc(f.title)}" data-st="${t}" data-i="${i}" aria-label="File title" placeholder="Title, e.g. Kick or Full mix"><small>${sz(f.file.size)}</small>
+    <button class="g del" data-sx="${t}" data-i="${i}" ${f.busy ? "disabled" : ""}>×</button><div class="nm">${esc(f.file.name)}</div><div class="bar" ${f.busy ? "" : "hidden"}><i></i></div></div>`).join("");
+  const n = staged[t].length, u = $("up-" + t); u.hidden = !n; u.textContent = `Upload ${n} file${n > 1 ? "s" : ""}`;
+}
+let pickTier = "basic";
+$("dFiles").addEventListener("click", async e => {
+  const d = e.target.dataset, btn = e.target.closest("button"); if (!btn) return;
+  if ("fx" in d) return closeFiles();
+  if (d.add) { pickTier = d.add; $("pick").value = ""; $("pick").click(); }
+  if (d.sx) { staged[d.sx].splice(+d.i, 1); drawStaged(d.sx); }
+  if (d.up) await uploadStaged(d.up);
+  if (d.rm && confirm("Remove this file? Customers will no longer be able to download it.")) {
+    try { await deleteObject(ref(st, d.p)); } catch {}
+    await deleteDoc(doc(db, "beats", fileBeat, "files", d.rm)); await syncCounts(fileBeat);
+  }
+});
+$("dFiles").addEventListener("change", async e => {
+  if (e.target.id === "pick") { [...e.target.files].forEach(f => staged[pickTier].push({ file: f, title: base(f.name) })); drawStaged(pickTier); }
+  if (e.target.dataset.rn) { const v = e.target.value.trim(); if (v) await updateDoc(doc(db, "beats", fileBeat, "files", e.target.dataset.rn), { title: v }); }
+  if (e.target.dataset.st) staged[e.target.dataset.st][+e.target.dataset.i].title = e.target.value;
+});
+$("dFiles").addEventListener("input", e => { if (e.target.dataset.st) staged[e.target.dataset.st][+e.target.dataset.i].title = e.target.value; });
+
+async function uploadStaged(t) {
+  const id = fileBeat, list = staged[t]; $("up-" + t).disabled = true;
+  for (let i = 0; i < list.length; i++) {
+    const it = list[i]; it.busy = true; drawStaged(t);
+    const title = it.title.trim() || base(it.file.name), path = `private/${id}/${t}/${Date.now()}_${fsafe(it.file.name)}`;
+    try {
+      const task = uploadBytesResumable(ref(st, path), it.file, { contentDisposition: `attachment; filename="${fsafe(title)}${ext(it.file.name)}"` });
+      await new Promise((res, rej) => task.on("state_changed", s => { const b = document.querySelector(`#s-${t}-${i} .bar i`); if (b) b.style.width = Math.round(s.bytesTransferred / s.totalBytes * 100) + "%"; }, rej, res));
+      await addDoc(collection(db, "beats", id, "files"), { title, name: it.file.name, path, tier: t, size: it.file.size, createdAtMs: Date.now() });
+      it.done = true;
+    } catch (err) { it.busy = false; alert(`Upload failed for ${it.file.name}: ${err.message}`); }
+  }
+  staged[t] = list.filter(x => !x.done); drawStaged(t); $("up-" + t).disabled = false;
+  await syncCounts(id);
+}
+async function syncCounts(id) {
+  const L = (await getDocs(collection(db, "beats", id, "files"))).docs.map(d => d.data());
+  await updateDoc(doc(db, "beats", id), { nBasic: L.filter(f => f.tier === "basic").length, nStems: L.filter(f => f.tier === "stems").length });
+}
 </script>
 </body>
 </html>
