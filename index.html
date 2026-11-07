@@ -114,6 +114,7 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 <section>
   <div class="row h"><span></span><span>Title</span><span>Time</span><span>BPM</span><span>Tags</span><span></span><span></span></div>
   <div id="list"><p class="empty">Loading beats…</p></div>
+  <div id="more" style="text-align:center;margin:20px 0"></div>
 </section>
 
 <section id="licensing">
@@ -169,7 +170,8 @@ const fmt = s => isFinite(s) && s ? Math.floor(s/60) + ":" + String(Math.floor(s
 const usd = n => "$" + Number(n).toFixed(2);
 const IC = {sh:'<svg viewBox="0 0 24 24"><path d="M4 12v7h16v-7M12 3v12M7 8l5-5 5 5"/></svg>'};
 const audio = new Audio(); audio.preload = "none";
-let beats = [], shown = [], cur = null, tag = "All", cart = [];
+const PAGE = 20;
+let beats = [], shown = [], cur = null, tag = "All", cart = [], limit = PAGE;
 try { cart = JSON.parse(localStorage.getItem("yc") || "[]"); } catch {}
 const DEF = { contact: CONTACT, hero: "",
   licensing: "MP3 & WAV: $40.00. MP3 and WAV files.\nUnlimited Stems: $200.00. MP3, WAV and stems with unlimited use.\nExclusive: make an offer. MP3, WAV and stems with exclusive rights.\n\nFiles are delivered by email after payment is confirmed. Contact us for the full contract." };
@@ -224,7 +226,7 @@ const toast = t => { const e = $("toast"); e.textContent = t; e.className = "on"
 onSnapshot(query(collection(db, "beats"), where("exclusive", "==", false)), snap => {
   beats = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
   chips(); render();
-  const h = location.hash.slice(1), el = h && $(h); if (!hitDone && el && el.classList.contains("row")) { hitDone = true; el.classList.add("hit"); el.scrollIntoView({ block: "center" }); }
+  const h = location.hash.slice(1); const hi = shown.findIndex(b => b.id === h); if (!hitDone && hi >= limit) { limit = hi + 1; render(); } const el = h && $(h); if (!hitDone && el && el.classList.contains("row")) { hitDone = true; el.classList.add("hit"); el.scrollIntoView({ block: "center" }); }
 }, () => $("list").innerHTML = '<p class="empty">Could not load beats. Check your connection and refresh.</p>');
 let hitDone = false;
 
@@ -232,13 +234,13 @@ function chips() {
   const t = ["All", ...new Set(beats.flatMap(b => (b.tags || "").split(",").map(x => x.trim()).filter(Boolean)))];
   $("chips").innerHTML = t.map(x => `<button class="chip${x === tag ? " on" : ""}" data-t="${esc(x)}">${esc(x)}</button>`).join("");
 }
-$("chips").onclick = e => { if (e.target.dataset.t) { tag = e.target.dataset.t; chips(); render(); } };
-$("q").oninput = render;
+$("chips").onclick = e => { if (e.target.dataset.t) { tag = e.target.dataset.t; limit = PAGE; chips(); render(); } };
+$("q").oninput = () => { limit = PAGE; render(); };
 
 function render() {
   const q = $("q").value.toLowerCase();
   shown = beats.filter(b => (tag === "All" || (b.tags || "").toLowerCase().includes(tag.toLowerCase())) && (!q || (b.title + " " + b.tags + " " + b.bpm).toLowerCase().includes(q)));
-  $("list").innerHTML = shown.length ? shown.map((b, i) => `
+  $("list").innerHTML = shown.length ? shown.slice(0, limit).map((b, i) => `
   <div class="row${cur === b.id ? " cur" : ""}" id="${esc(b.id)}">
     <button class="cv" data-p="${i}" aria-label="Play ${esc(b.title)}" ${b.coverUrl ? `style="background-image:url('${esc(b.coverUrl)}')"` : ""}>${b.coverUrl ? "" : "Y"}<b>${cur === b.id && !audio.paused ? "❚❚" : "▶"}</b></button>
     <div class="info"><span class="t">${esc(b.title)}</span><small>${esc(b.bpm || "-")} BPM · ${esc(b.tags)}</small></div>
@@ -246,7 +248,10 @@ function render() {
     <button class="ic" data-s="${i}" aria-label="Share ${esc(b.title)}">${IC.sh}</button>
     <button class="buy" data-b="${i}">${usd(LIC[0][2])}</button>
   </div>`).join("") : '<p class="empty">No beats found. Try a different search.</p>';
+  const left = shown.length - limit;
+  $("more").innerHTML = left > 0 ? `<button class="btn" id="moreBtn">Browse more beats (${left} more)</button>` : "";
 }
+$("more").onclick = e => { if (e.target.id === "moreBtn") { limit += PAGE; render(); } };
 
 $("list").onclick = e => {
   const t = e.target.closest("button"); if (!t) return; const d = t.dataset;
@@ -304,7 +309,7 @@ function play(b) {
   cur = b.id; audio.src = b.audioUrl; audio.play();
 }
 audio.onplay = audio.onpause = () => render();
-audio.onended = () => { const i = shown.findIndex(b => b.id === cur); if (shown[i + 1]) play(shown[i + 1]); };
+audio.onended = () => { const i = shown.findIndex(b => b.id === cur); if (shown[i + 1]) { if (i + 1 >= limit) { limit += PAGE; render(); } play(shown[i + 1]); } };
 </script>
 </body>
 </html>
