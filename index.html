@@ -111,7 +111,7 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 <header>
   <a class="logo" href="#top"><i>Y</i>YANASTAN</a>
   <nav><a href="#beats">Beats</a><a href="#licensing">Licensing</a><a href="#contact">Contact</a></nav>
-  <a class="adm" id="acct" href="#">Sign in</a>
+  <a class="adm" id="adminLink" href="admin.html" hidden>Admin</a><a class="adm" id="acct" href="#">Sign in</a>
   <button id="cartBtn" aria-label="Open cart"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/></svg><span id="ct">$0.00</span></button>
 </header>
 
@@ -183,7 +183,8 @@ const app = initializeApp({
 const db = getFirestore(app), auth = getAuth(app), st = getStorage(app);
 let user = null;
 let mode = "in", accUnsubs = [], afterAuth = null;
-onAuthStateChanged(auth, u => { user = u; $("acct").textContent = u ? "My account" : "Sign in";
+const ADMIN_UID = "BBS0vo8W1sdJ118GCJdAF63Q7eC3";
+onAuthStateChanged(auth, u => { user = u; $("acct").textContent = u ? "My account" : "Sign in"; $("adminLink").hidden = !(u && u.uid === ADMIN_UID);
   if (u && afterAuth) { const f = afterAuth; afterAuth = null; $("dAcct").close(); f(); }
   else if ($("dAcct").open) renderAcct();
   if ($("dCart").open) openCart(); });
