@@ -71,6 +71,39 @@ dialog::backdrop{background:rgba(0,0,0,.75)}
 @media(max-width:640px){.fr{grid-template-columns:1fr auto}.fr small{display:none}dialog{padding:16px}}
 @media(max-width:640px){form,.grid{grid-template-columns:1fr}header{padding:12px 16px}.card{padding:18px}.tabs{width:100%}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+[hidden]{display:none!important}
+.fm{display:grid;gap:14px}
+.fm-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.fm-h b{font:400 13px Michroma,sans-serif;color:var(--gold)}
+.tier{border:1px solid var(--line);border-radius:12px;background:var(--panel2);transition:border-color .15s}
+.tier.on{border-color:rgba(201,164,92,.45)}
+.th{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;cursor:pointer}
+.th b{font-weight:600;display:flex;align-items:center;gap:8px}.th small{display:block;color:var(--mute);font-weight:400;font-size:13px;margin-top:2px}
+.sw{position:relative;display:block;width:48px;height:26px;flex:none;cursor:pointer}
+.sw input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:1}
+.sw i{position:absolute;inset:0;background:#0a0606;border:1px solid var(--line);border-radius:20px;transition:.15s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--mute);transition:.15s}
+.sw input:checked+i{background:var(--red);border-color:var(--red)}
+.sw input:checked+i::after{transform:translateX(22px);background:var(--gold)}
+.sw input:focus-visible+i{outline:2px solid var(--gold);outline-offset:2px}
+.tb{padding:0 16px 16px;display:grid;gap:10px}
+.lv{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:8px 10px;background:#0f0a0a;border:1px solid var(--line);border-radius:10px}
+.lv small{color:var(--mute);font-weight:400;white-space:nowrap}.lv .nm{grid-column:1/-1;color:var(--mute);font-size:12px;overflow-wrap:anywhere}
+.lv input{padding:8px 10px}
+.fr2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) auto;gap:10px;align-items:stretch;padding:10px;background:#0f0a0a;border:1px solid var(--line);border-radius:10px}
+.fr2 .ti{align-self:center}
+.dz{display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;padding:10px 12px;border:1px dashed #4a3636;border-radius:8px;color:var(--mute);font-size:14px;cursor:pointer;transition:.15s;min-height:44px;overflow-wrap:anywhere}
+.dz:hover,.dz.over{border-color:var(--gold);color:var(--gold);background:rgba(201,164,92,.06)}
+.dz.has{border-style:solid;border-color:rgba(111,191,138,.5);color:var(--ok)}
+.dz input{display:none}
+.fr2 .x{align-self:center;padding:6px 12px}
+.fr2 .bar{display:none;grid-column:1/-1}.fr2.busy .bar{display:block}
+.fr2.fail{border-color:#ff6b6b}
+.pubrow{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pubrow button{padding:13px 30px}
+#up-all{width:100%;margin-top:4px}
+@media(max-width:640px){.fr2{grid-template-columns:1fr auto}.fr2 .dz{grid-column:1/-1;order:3}}
 </style>
 
 </head>
@@ -99,7 +132,9 @@ dialog::backdrop{background:rgba(0,0,0,.75)}
           <label>MP3 lease price (USD) <span class="hint">Leave blank for $60</span><input id="price" type="number" min="0" step="0.01"></label>
           <label class="full">Preview audio <span class="hint">The clip visitors hear on the site</span><input id="file" type="file" accept="audio/*"></label>
           <label class="full">Cover image <span class="hint">Optional</span><input id="cover" type="file" accept="image/*"></label>
-          <div class="full"><button id="add">Publish beat</button> <span class="hint">Next you will add the MP3, WAV and stem files customers download.</span></div>
+          <div class="full fm-h"><b>Downloadable files</b><span class="hint">Turn on what this beat includes. Add as many files as you need.</span></div>
+          <div class="full" id="fmNew"></div>
+          <div class="full pubrow"><button id="add">Publish beat</button><span class="hint">Everything uploads together, no second step.</span></div>
           <p class="full" id="msg"></p>
         </form>
       </div>
@@ -135,7 +170,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const say = (t, bad) => { $("msg").textContent = t; $("msg").className = bad ? "err" : ""; };
 const day = t => t?.seconds ? new Date(t.seconds * 1000).toLocaleDateString() : "";
-let unsubs = [], orderMap = {}, fileUnsub = null, fileBeat = null, staged = { basic: [], stems: [] };
+let unsubs = [], orderMap = {}, fileUnsub = null, fileBeat = null;
 
 const watch = (name, fn) => onSnapshot(query(collection(db, name), orderBy("createdAt", "desc")), s => fn(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 const none = t => `<p class="empty">${t}</p>`;
@@ -211,8 +246,10 @@ $("af").onsubmit = async e => {
     const title = $("title").value.trim();
     const r = await addDoc(collection(db, "beats"), { title, bpm: +$("bpm").value || 0, tags: $("tags").value.trim() || "Dancehall",
       price: $("price").value || "", audioUrl, coverUrl, exclusive: false, duration: dur, nBasic: 0, nStems: 0, createdAt: serverTimestamp() });
-    $("af").reset(); say("Published. It is live on the site. Now add the downloadable files.");
-    openFiles(r.id, title);
+    const failed = await fmNew.uploadAll(r.id, say);
+    await syncCounts(r.id);
+    $("af").reset(); fmNew.reset();
+    say(failed ? `Published, but ${failed} file${failed > 1 ? "s" : ""} failed. Open Files on the beat to retry.` : "Published. The beat and all its files are live.", !!failed);
   } catch (err) { say("Failed: " + err.message, true); }
   $("add").disabled = false;
 };
@@ -265,74 +302,110 @@ async function revoke(o) {
   await b.commit();
 }
 
-/* ---------- file manager (MP3/WAV + stems, many files per beat) ---------- */
+/* ---------- file manager (switchable MP3/WAV + stems, any number of files) ---------- */
 const TIERS = [["basic", "MP3 & WAV files", "Included with every license"], ["stems", "Stems", "Only for Unlimited Stems and Exclusive buyers"]];
+const ACCEPT = "audio/*,.wav,.mp3,.zip,.rar,.aif,.aiff,.flac";
 const sz = n => n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
 const base = n => n.replace(/\.[^.]+$/, "");
 const ext = n => (n.match(/\.[^.]+$/) || [""])[0];
 const fsafe = n => n.replace(/[^\w. -]/g, "_").trim() || "file";
+let rk = 0;
+const mkRow = () => ({ k: ++rk, file: null, title: "" });
 
+function makeFM(root, beatId) {
+  const S = { basic: { on: true, rows: [mkRow()], live: [] }, stems: { on: false, rows: [], live: [] } };
+  const row = (t, k) => S[t].rows.find(r => r.k === k);
+  const rowHtml = (t, r) => `<div class="fr2" data-k="${r.k}" data-t="${t}">
+      <input class="ti" data-ti value="${esc(r.title)}" placeholder="Title, e.g. ${t === "stems" ? "Kick, Bass, Melody" : "Full mix"}" aria-label="File title">
+      <label class="dz${r.file ? " has" : ""}" data-dz>${r.file ? `✓ ${esc(r.file.name)} · ${sz(r.file.size)}` : "Drop audio here or click to choose"}<input type="file" data-pick multiple accept="${ACCEPT}"></label>
+      <button type="button" class="g del x" data-delrow aria-label="Remove file slot">×</button><div class="bar"><i></i></div></div>`;
+  const liveHtml = t => S[t].live.map(f => `<div class="lv"><input value="${esc(f.title)}" data-rn="${f.id}" aria-label="File title"><small>${sz(f.size || 0)}</small>
+      <button type="button" class="g del" data-rm="${f.id}" data-p="${esc(f.path)}">Remove</button><div class="nm">${esc(f.name)}</div></div>`).join("");
+  function drawLive(t) { const el = root.querySelector(`[data-live="${t}"]`); if (el) el.innerHTML = liveHtml(t); const c = root.querySelector(`[data-c="${t}"]`); if (c) c.textContent = S[t].live.length; btn(); }
+  function drawRows(t) { const el = root.querySelector(`[data-rows="${t}"]`); if (el) el.innerHTML = S[t].rows.map(r => rowHtml(t, r)).join(""); btn(); }
+  function draw() {
+    root.innerHTML = `<div class="fm">` + TIERS.map(([t, name, hint]) => `<div class="tier${S[t].on ? " on" : ""}" data-tier="${t}">
+      <label class="th"><div><b>${name} <span class="ct" data-c="${t}">${S[t].live.length}</span></b><small>${hint}</small></div>
+        <span class="sw"><input type="checkbox" data-sw="${t}" ${S[t].on ? "checked" : ""} aria-label="Include ${name}"><i></i></span></label>
+      <div class="tb" ${S[t].on ? "" : "hidden"}><div data-live="${t}">${liveHtml(t)}</div><div data-rows="${t}">${S[t].rows.map(r => rowHtml(t, r)).join("")}</div>
+        <button type="button" class="plus" data-addrow="${t}">+ Add another file</button></div></div>`).join("") +
+      (beatId ? `<button type="button" id="up-all" data-upall hidden></button><p class="hint" data-fmmsg></p>` : "") + `</div>`;
+    btn();
+  }
+  const staged = () => TIERS.flatMap(([t]) => S[t].on ? S[t].rows.filter(r => r.file) : []);
+  function btn() { const u = root.querySelector("[data-upall]"); if (!u) return; const n = staged().length; u.hidden = !n; u.textContent = `Upload ${n} file${n > 1 ? "s" : ""}`; }
+  function setFiles(t, k, files) {
+    files = [...files]; if (!files.length) return; const r = row(t, k);
+    files.forEach((f, i) => { let x = r; if (i > 0) { x = mkRow(); S[t].rows.splice(S[t].rows.indexOf(r) + i, 0, x); } x.file = f; if (!x.title.trim()) x.title = base(f.name); });
+    drawRows(t);
+  }
+  root.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "checkbox") e.preventDefault(); });
+  root.addEventListener("input", e => { const r = e.target.closest(".fr2"); if (r && e.target.dataset.ti !== undefined) row(r.dataset.t, +r.dataset.k).title = e.target.value; });
+  root.addEventListener("change", async e => {
+    const el = e.target, r = el.closest(".fr2");
+    if (el.dataset.sw) { const t = el.dataset.sw; S[t].on = el.checked; if (el.checked && !S[t].rows.length) S[t].rows.push(mkRow()); draw(); }
+    else if (el.dataset.pick !== undefined && r) setFiles(r.dataset.t, +r.dataset.k, el.files);
+    else if (el.dataset.rn) { const v = el.value.trim(); if (v) await updateDoc(doc(db, "beats", beatId, "files", el.dataset.rn), { title: v }); }
+  });
+  root.addEventListener("click", async e => {
+    const b = e.target.closest("button"); if (!b) return; const d = b.dataset;
+    if (d.addrow) { const t = d.addrow; S[t].rows.push(mkRow()); drawRows(t); root.querySelector(`[data-rows="${t}"] .fr2:last-child .ti`)?.focus(); }
+    if (d.delrow !== undefined) { const r = b.closest(".fr2"), t = r.dataset.t; S[t].rows = S[t].rows.filter(x => x.k !== +r.dataset.k); drawRows(t); }
+    if (d.rm && confirm("Remove this file? Customers will no longer be able to download it.")) {
+      try { await deleteObject(ref(st, d.p)); } catch {}
+      await deleteDoc(doc(db, "beats", beatId, "files", d.rm)); await syncCounts(beatId);
+    }
+    if (d.upall !== undefined) {
+      b.disabled = true; const msg = root.querySelector("[data-fmmsg]");
+      const failed = await api.uploadAll(beatId, t => { msg.textContent = t; });
+      await syncCounts(beatId); msg.textContent = failed ? `${failed} failed. Fix and try again.` : "Uploaded. Customers can download these now."; b.disabled = false;
+    }
+  });
+  root.addEventListener("dragover", e => { const z = e.target.closest("[data-dz]"); if (z) { e.preventDefault(); z.classList.add("over"); } });
+  root.addEventListener("dragleave", e => e.target.closest?.("[data-dz]")?.classList.remove("over"));
+  root.addEventListener("drop", e => { const z = e.target.closest("[data-dz]"); if (!z) return; e.preventDefault(); z.classList.remove("over"); const r = z.closest(".fr2"); setFiles(r.dataset.t, +r.dataset.k, e.dataTransfer.files); });
+
+  const api = {
+    reset() { S.basic = { on: true, rows: [mkRow()], live: [] }; S.stems = { on: false, rows: [], live: [] }; draw(); },
+    setLive(L) { TIERS.forEach(([t]) => { const was = S[t].live.length; S[t].live = L.filter(f => f.tier === t).sort((a, b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
+      if (!api.init && S[t].live.length) S[t].on = true; });
+      if (!api.init) { api.init = true; TIERS.forEach(([t]) => { if (S[t].on && !S[t].rows.length) S[t].rows.push(mkRow()); }); draw(); } else TIERS.forEach(([t]) => drawLive(t)); },
+    async uploadAll(id, say) {
+      let failed = 0; const all = staged(), total = all.length; let n = 0;
+      for (const [t] of TIERS) { if (!S[t].on) continue;
+        for (const r of S[t].rows.filter(x => x.file)) {
+          const el = root.querySelector(`[data-k="${r.k}"]`); el?.classList.add("busy"); el?.classList.remove("fail"); n++;
+          const title = r.title.trim() || base(r.file.name), path = `private/${id}/${t}/${Date.now()}_${fsafe(r.file.name)}`;
+          try {
+            const task = uploadBytesResumable(ref(st, path), r.file, { contentDisposition: `attachment; filename="${fsafe(title)}${ext(r.file.name)}"` });
+            await new Promise((res, rej) => task.on("state_changed", s => { const p = Math.round(s.bytesTransferred / s.totalBytes * 100); const i = el?.querySelector(".bar i"); if (i) i.style.width = p + "%"; say && say(`Uploading file ${n} of ${total}: ${title} ${p}%`); }, rej, res));
+            await addDoc(collection(db, "beats", id, "files"), { title, name: r.file.name, path, tier: t, size: r.file.size, createdAtMs: Date.now() });
+            r.done = true;
+          } catch (err) { failed++; el?.classList.remove("busy"); el?.classList.add("fail"); }
+        }
+        S[t].rows = S[t].rows.filter(x => !x.done); if (S[t].on && !S[t].rows.length) S[t].rows.push(mkRow());
+      }
+      draw(); return failed;
+    }
+  };
+  draw(); return api;
+}
+
+const fmNew = makeFM($("fmNew"), null);
+let fm = null;
 function openFiles(id, title) {
-  fileBeat = id; staged = { basic: [], stems: [] };
+  fileBeat = id;
   $("dFiles").innerHTML = `<div class="dh"><h2>Files: ${esc(title)}</h2><button class="g" data-fx>Close</button></div>
-    <p class="hint">Add as many files as you need, give each a clear title, then press Upload. Customers see these titles.</p>` +
-    TIERS.map(([t, name, hint]) => `<div class="sec"><h3>${name} <span class="ct" id="c-${t}">0</span></h3><p class="hint" style="margin-bottom:10px">${hint}</p>
-      <div id="live-${t}"></div><div id="stg-${t}"></div>
-      <button class="plus" data-add="${t}">+ Add file</button>
-      <button id="up-${t}" data-up="${t}" hidden style="margin-top:10px;width:100%"></button></div>`).join("") +
-    `<input id="pick" type="file" multiple hidden>`;
+    <p class="hint" style="margin-bottom:14px">Flip a switch to offer MP3 &amp; WAV or stems for this beat, then add as many titled files as you need and press Upload.</p><div id="fmRoot"></div>`;
+  fm = makeFM($("fmRoot"), id);
   $("dFiles").showModal();
   fileUnsub && fileUnsub();
-  fileUnsub = onSnapshot(collection(db, "beats", id, "files"), s => {
-    const L = s.docs.map(d => ({ id: d.id, ...d.data() }));
-    TIERS.forEach(([t]) => { const g = L.filter(f => f.tier === t).sort((a, b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
-      $("c-" + t).textContent = g.length;
-      $("live-" + t).innerHTML = g.map(f => `<div class="fr"><input value="${esc(f.title)}" data-rn="${f.id}" aria-label="File title"><small>${sz(f.size || 0)}</small>
-        <button class="g del" data-rm="${f.id}" data-p="${esc(f.path)}">Remove</button><div class="nm">${esc(f.name)}</div></div>`).join(""); });
-  });
+  fileUnsub = onSnapshot(collection(db, "beats", id, "files"), s => fm.setLive(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 }
 const closeFiles = () => { fileUnsub && fileUnsub(); fileUnsub = null; $("dFiles").close(); };
 $("dFiles").addEventListener("close", () => { fileUnsub && fileUnsub(); fileUnsub = null; });
+$("dFiles").addEventListener("click", e => { if (e.target.closest("button")?.dataset.fx !== undefined) closeFiles(); });
 
-function drawStaged(t) {
-  $("stg-" + t).innerHTML = staged[t].map((f, i) => `<div class="fr" id="s-${t}-${i}"><input value="${esc(f.title)}" data-st="${t}" data-i="${i}" aria-label="File title" placeholder="Title, e.g. Kick or Full mix"><small>${sz(f.file.size)}</small>
-    <button class="g del" data-sx="${t}" data-i="${i}" ${f.busy ? "disabled" : ""}>×</button><div class="nm">${esc(f.file.name)}</div><div class="bar" ${f.busy ? "" : "hidden"}><i></i></div></div>`).join("");
-  const n = staged[t].length, u = $("up-" + t); u.hidden = !n; u.textContent = `Upload ${n} file${n > 1 ? "s" : ""}`;
-}
-let pickTier = "basic";
-$("dFiles").addEventListener("click", async e => {
-  const d = e.target.dataset, btn = e.target.closest("button"); if (!btn) return;
-  if ("fx" in d) return closeFiles();
-  if (d.add) { pickTier = d.add; $("pick").value = ""; $("pick").click(); }
-  if (d.sx) { staged[d.sx].splice(+d.i, 1); drawStaged(d.sx); }
-  if (d.up) await uploadStaged(d.up);
-  if (d.rm && confirm("Remove this file? Customers will no longer be able to download it.")) {
-    try { await deleteObject(ref(st, d.p)); } catch {}
-    await deleteDoc(doc(db, "beats", fileBeat, "files", d.rm)); await syncCounts(fileBeat);
-  }
-});
-$("dFiles").addEventListener("change", async e => {
-  if (e.target.id === "pick") { [...e.target.files].forEach(f => staged[pickTier].push({ file: f, title: base(f.name) })); drawStaged(pickTier); }
-  if (e.target.dataset.rn) { const v = e.target.value.trim(); if (v) await updateDoc(doc(db, "beats", fileBeat, "files", e.target.dataset.rn), { title: v }); }
-  if (e.target.dataset.st) staged[e.target.dataset.st][+e.target.dataset.i].title = e.target.value;
-});
-$("dFiles").addEventListener("input", e => { if (e.target.dataset.st) staged[e.target.dataset.st][+e.target.dataset.i].title = e.target.value; });
-
-async function uploadStaged(t) {
-  const id = fileBeat, list = staged[t]; $("up-" + t).disabled = true;
-  for (let i = 0; i < list.length; i++) {
-    const it = list[i]; it.busy = true; drawStaged(t);
-    const title = it.title.trim() || base(it.file.name), path = `private/${id}/${t}/${Date.now()}_${fsafe(it.file.name)}`;
-    try {
-      const task = uploadBytesResumable(ref(st, path), it.file, { contentDisposition: `attachment; filename="${fsafe(title)}${ext(it.file.name)}"` });
-      await new Promise((res, rej) => task.on("state_changed", s => { const b = document.querySelector(`#s-${t}-${i} .bar i`); if (b) b.style.width = Math.round(s.bytesTransferred / s.totalBytes * 100) + "%"; }, rej, res));
-      await addDoc(collection(db, "beats", id, "files"), { title, name: it.file.name, path, tier: t, size: it.file.size, createdAtMs: Date.now() });
-      it.done = true;
-    } catch (err) { it.busy = false; alert(`Upload failed for ${it.file.name}: ${err.message}`); }
-  }
-  staged[t] = list.filter(x => !x.done); drawStaged(t); $("up-" + t).disabled = false;
-  await syncCounts(id);
-}
 async function syncCounts(id) {
   const L = (await getDocs(collection(db, "beats", id, "files"))).docs.map(d => d.data());
   await updateDoc(doc(db, "beats", id), { nBasic: L.filter(f => f.tier === "basic").length, nStems: L.filter(f => f.tier === "stems").length });

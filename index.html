@@ -104,6 +104,46 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 .g{background:none;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:8px 14px}
 .legal{white-space:pre-wrap}
 .doc h4{color:var(--gold);font-size:15px;margin:18px 0 6px}.doc h5{font-size:14px;margin:12px 0 4px}.doc p,.doc li{font-size:14px;color:var(--txt);margin:6px 0}.doc ul{padding-left:20px}.doc .eff{color:var(--mute)}
+
+dialog.dash{width:min(880px,96vw);padding:0;background:#0f0a0a}
+.dhd{display:flex;align-items:center;gap:14px;padding:20px 22px;background:linear-gradient(120deg,rgba(168,0,0,.35),transparent),#140d0d;border-bottom:1px solid var(--line)}
+.av{width:52px;height:52px;border-radius:50%;background:var(--red);color:var(--gold);display:grid;place-items:center;font:400 22px Michroma,sans-serif;flex:none;border:2px solid var(--gold)}
+.who{flex:1;min-width:0}.who b{display:block;font-size:19px;overflow:hidden;text-overflow:ellipsis}.who small{color:var(--mute);overflow-wrap:anywhere}
+.dtabs{display:flex;gap:6px;padding:10px 22px;border-bottom:1px solid var(--line);overflow-x:auto;position:sticky;top:0;background:#0f0a0a;z-index:2}
+.dtabs button{background:none;border:0;color:var(--mute);padding:9px 16px;border-radius:8px;font:inherit;font-weight:600;white-space:nowrap}
+.dtabs button:hover{color:var(--txt)}.dtabs button.on{background:var(--red);color:var(--gold)}
+#dpanel{padding:20px 22px 26px;min-height:320px}
+dialog.dash .aerr{margin:8px 22px 0;min-height:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:8px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.stat b{display:block;font:400 22px Michroma,sans-serif;color:var(--gold);margin-bottom:4px}.stat span{color:var(--mute);font-size:13px}
+.dsec{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin:22px 0 10px;display:flex;justify-content:space-between;align-items:center}
+.lnk{background:none;border:0;color:var(--gold);text-decoration:underline;padding:0;font:inherit;font-size:inherit;cursor:pointer}
+.lnk:hover{color:#fff}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tools input{flex:1;min-width:180px;margin:0;border-radius:24px;padding:10px 16px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.card2{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card2 .top{display:flex;gap:12px;align-items:center}
+.card2 .top .cv{width:56px;height:56px}
+.card2 .top .bd{flex:1;min-width:0}.card2 .top small{color:var(--mute);display:block}
+.card2 .fl{align-items:center}.fl .nm2{flex:1;min-width:0}.fl .nm2 small{color:var(--mute);margin-left:6px}
+.fl .ib{background:none;border:1px solid var(--line);color:var(--gold);width:32px;height:32px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:12px}
+.fl .ib:hover{border-color:var(--gold)}
+.lock{margin-top:10px;padding:10px 12px;border:1px dashed var(--gold);border-radius:8px;font-size:14px;color:var(--mute)}
+.ghost{background:none;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}.ghost:hover{border-color:var(--gold);color:var(--gold)}
+details.od{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+details.od summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;cursor:pointer}
+details.od summary::-webkit-details-marker{display:none}
+details.od summary small{display:block;color:var(--mute)}
+details.od[open] summary{border-bottom:1px solid var(--line)}
+.odb{padding:10px 14px 14px}.odb .ln{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}.odb .ln span:first-child small{color:var(--mute);margin-left:6px}
+.set{display:grid;gap:14px;max-width:460px}.set label{display:grid;gap:4px;color:var(--mute);font-size:14px;font-weight:600}.set input{margin:0}
+.set .row2{display:flex;gap:10px;flex-wrap:wrap}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.skel{height:64px;border-radius:12px;background:linear-gradient(90deg,var(--panel),#1d1414,var(--panel));background-size:200% 100%;animation:sk 1.2s infinite;margin-bottom:10px}
+@keyframes sk{to{background-position:-200% 0}}
+@media(max-width:640px){.dhd,.dtabs,#dpanel{padding-left:14px;padding-right:14px}dialog.dash .aerr{margin-left:14px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
@@ -372,7 +412,7 @@ const when = t => t?.seconds ? new Date(t.seconds * 1000).toLocaleDateString() :
 
 function openAcct(then) { afterAuth = then || null; renderAcct(); if (!$("dAcct").open) $("dAcct").showModal(); }
 function renderAcct() {
-  accUnsubs.forEach(f => f()); accUnsubs = []; const d = $("dAcct");
+  stopAcct(); const d = $("dAcct"); d.classList.toggle("dash", !!user);
   if (!user) {
     const up = mode === "up";
     d.innerHTML = `<div class="dh"><h3>${up ? "Create account" : "Sign in"}</h3><button class="x" data-x aria-label="Close">×</button></div>
@@ -383,31 +423,106 @@ function renderAcct() {
       <p class="or"><a href="#" data-forgot>Forgot password?</a></p><button class="g2 w" type="button" data-g>Continue with Google</button><p class="aerr" id="aerr" role="alert"></p>`;
     return;
   }
-  d.innerHTML = `<div class="dh"><h3>My account</h3><button class="x" data-x aria-label="Close">×</button></div>
-    <div class="me"><div><b>${esc(user.displayName || "Welcome")}</b><small>${esc(user.email)}</small></div><div><button class="g2" data-reset>Reset password</button> <button class="g2" data-out>Sign out</button></div></div>
-    <p class="aerr" id="aerr" role="alert" style="margin:4px 0 0"></p>
-    <div class="ah">My purchases</div><div id="buys"><p class="empty">Loading…</p></div><div class="ah">Orders</div><div id="ords"><p class="empty">Loading…</p></div>`;
-  accUnsubs.push(onSnapshot(collection(db, "users", user.uid, "purchases"), s => renderBuys(s.docs.map(x => ({ id: x.id, ...x.data() }))),
-    () => { $("buys") && ($("buys").innerHTML = '<p class="empty">Could not load purchases. Refresh and try again.</p>'); }));
-  accUnsubs.push(onSnapshot(query(collection(db, "orders"), where("uid", "==", user.uid)), s => renderOrds(s.docs.map(x => ({ id: x.id, ...x.data() }))),
-    () => { $("ords") && ($("ords").innerHTML = '<p class="empty">Could not load orders.</p>'); }));
+  const ini = (user.displayName || user.email || "?")[0].toUpperCase();
+  d.innerHTML = `<div class="dhd"><div class="av">${esc(ini)}</div><div class="who"><b id="dname">${esc(user.displayName || "Welcome")}</b><small>${esc(user.email)}</small></div><button class="x" data-x aria-label="Close">×</button></div>
+    <div class="dtabs" id="dtabs">${[["overview", "Overview"], ["library", "My library"], ["orders", "Orders"], ["settings", "Settings"]].map(([k, n]) => `<button data-tab="${k}">${n}</button>`).join("")}</div>
+    <p class="aerr" id="aerr" role="alert"></p><div id="dpanel"></div>`;
+  acc.loaded = { b: false, o: false }; panel();
+  accUnsubs.push(onSnapshot(collection(db, "users", user.uid, "purchases"), s => {
+    acc.buys = s.docs.map(x => ({ id: x.id, ...x.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)); acc.loaded.b = true;
+    fUn.forEach(f => f()); fUn = [];
+    [...new Set(acc.buys.map(p => p.beatId))].forEach(id => fUn.push(onSnapshot(collection(db, "beats", id, "files"), q => { acc.files[id] = q.docs.map(x => x.data()); refresh(); }, () => { acc.files[id] = acc.files[id] || []; refresh(); })));
+    refresh();
+  }, () => { acc.loaded.b = true; acc.buys = []; refresh(); aerr("Could not load purchases. Refresh and try again."); }));
+  accUnsubs.push(onSnapshot(query(collection(db, "orders"), where("uid", "==", user.uid)), s => {
+    acc.ords = s.docs.map(x => ({ id: x.id, ...x.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)); acc.loaded.o = true; refresh();
+  }, () => { acc.loaded.o = true; refresh(); }));
 }
-async function renderBuys(L) {
-  L.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-  if (!L.length) { $("buys").innerHTML = '<p class="empty">No purchases yet. Once your order is paid, your beats and files appear here.</p>'; return; }
-  const html = await Promise.all(L.map(async p => {
-    let fs = []; try { fs = (await getDocs(collection(db, "beats", p.beatId, "files"))).docs.map(x => x.data()); } catch {}
-    fs = fs.filter(f => f.tier === "basic" || p.level >= 2).sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-    const grp = (t, n) => { const g = fs.filter(f => f.tier === t); return g.length ? `<div class="gr">${n}</div>` + g.map(f => `<div class="fl"><span>${esc(f.title)} <small style="color:var(--mute)">${bytes(f.size || 0)}</small></span><button data-dl="${esc(f.path)}">Download</button></div>`).join("") : ""; };
-    return `<div class="bu"><div class="cv" ${p.cover ? `style="background-image:url('${esc(p.cover)}')"` : ""}>${p.cover ? "" : "♪"}</div><div class="bd"><b>${esc(p.title)}</b><span class="pl">${esc(LV[p.level] || p.license)}</span>
-      ${grp("basic", "MP3 &amp; WAV")}${grp("stems", "Stems")}${fs.length ? "" : '<p class="empty" style="padding:8px 0">Files are being added. Check back soon.</p>'}</div></div>`;
-  }));
-  if ($("buys")) $("buys").innerHTML = html.join("");
+
+/* ---------- dashboard state + views ---------- */
+const acc = { tab: "overview", buys: [], ords: [], files: {}, q: "", lf: "All", of: "All", loaded: { b: false, o: false } };
+let fUn = [];
+const stopAcct = () => { accUnsubs.forEach(f => f()); accUnsubs = []; fUn.forEach(f => f()); fUn = []; };
+const fa = new Audio(); let faPath = null;
+fa.onplay = fa.onpause = fa.onended = () => paintPlay();
+function paintPlay() { document.querySelectorAll("[data-pf]").forEach(b => { const on = b.dataset.pf === faPath && !fa.paused; b.textContent = on ? "❚❚" : "▶"; b.setAttribute("aria-label", on ? "Pause preview" : "Play"); }); }
+const dshort = t => t?.seconds ? new Date(t.seconds * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "";
+const isAud = n => /\.(mp3|wav|m4a|aac|ogg|flac|aiff?)$/i.test(n || "");
+const visFiles = p => (acc.files[p.beatId] || []).filter(f => f.tier === "basic" || p.level >= 2).sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+const lockedN = p => p.level >= 2 ? 0 : (acc.files[p.beatId] || []).filter(f => f.tier === "stems").length;
+const skel = () => '<div class="skel"></div><div class="skel"></div>';
+const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
+
+function panel() {
+  const p = $("dpanel"); if (!p) return;
+  document.querySelectorAll("#dtabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === acc.tab));
+  p.innerHTML = ({ overview: pOver, library: pLib, orders: pOrd, settings: pSet })[acc.tab]();
+  if (acc.tab === "library") drawLib(); paintPlay();
 }
-function renderOrds(L) {
-  L.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-  if ($("ords")) $("ords").innerHTML = L.map(o => `<div class="ci"><div><b>${(o.items || []).map(i => esc(i.title)).join(", ")}</b><small>${(o.items || []).map(i => esc(i.lic)).join(", ")} · ${when(o.createdAt)}</small></div>
-    <div style="text-align:right"><b>${usd(o.total)}</b><br><span class="st ${o.status === "paid" ? "" : "new"}">${o.status === "paid" ? "Paid" : "Awaiting payment"}</span></div></div>`).join("") || '<p class="empty">No orders yet.</p>';
+function refresh() { if (!$("dpanel")) return; if (acc.tab === "library") drawLib(); else if (acc.tab !== "settings") panel(); }
+
+function pOver() {
+  if (!acc.loaded.b || !acc.loaded.o) return skel();
+  const paid = acc.ords.filter(o => o.status === "paid"), spent = paid.reduce((s, o) => s + Number(o.total || 0), 0), pend = acc.ords.length - paid.length;
+  const nf = acc.buys.reduce((s, p) => s + visFiles(p).length, 0);
+  const up = acc.buys.filter(p => lockedN(p) > 0);
+  return `<div class="stats"><div class="stat"><b>${acc.buys.length}</b><span>Beats owned</span></div><div class="stat"><b>${nf}</b><span>Files ready to download</span></div>
+    <div class="stat"><b>${usd(spent)}</b><span>Total spent</span></div><div class="stat"><b>${acc.ords.length}</b><span>Orders</span></div></div>
+    ${pend ? `<div class="note">⏳ ${plural(pend, "order")} awaiting payment confirmation. Your files unlock as soon as it is confirmed. <button class="lnk" data-tab-go="orders">View orders</button></div>` : ""}
+    <div class="dsec"><span>Recent purchases</span>${acc.buys.length ? '<button class="lnk" data-tab-go="library">See all</button>' : ""}</div>
+    ${acc.buys.slice(0, 3).map(p => `<div class="card2"><div class="top"><div class="cv" ${p.cover ? `style="background-image:url('${esc(p.cover)}')"` : ""}>${p.cover ? "" : "♪"}</div>
+      <div class="bd"><b>${esc(p.title)}</b><span class="pl">${esc(LV[p.level] || p.license)}</span><small>${dshort(p.createdAt)} · ${plural(visFiles(p).length, "file")}</small></div>
+      <button class="ghost" data-open="${esc(p.beatId)}">Open files</button></div></div>`).join("") || '<p class="empty">No purchases yet. Pick a beat and it will show up here once paid.</p>'}
+    ${up.length ? `<div class="dsec"><span>Upgrade available</span></div>` + up.map(p => `<div class="lock"><b style="color:var(--txt)">${esc(p.title)}</b>: ${plural(lockedN(p), "stem file")} included with Unlimited Stems. <button class="lnk" data-go="${esc(p.beatId)}">Upgrade this beat</button></div>`).join("") : ""}
+    <div class="dsec"><span>Quick actions</span></div><div class="cta"><button class="ghost" data-browse>Browse more beats</button><a class="ghost" style="text-decoration:none" href="mailto:${esc(site.contact)}?subject=Support">Contact support</a><button class="ghost" data-tab-go="settings">Account settings</button></div>`;
+}
+function pLib() {
+  return `<div class="tools"><input id="lq" type="search" placeholder="Search your beats" aria-label="Search your beats" value="${esc(acc.q)}"></div>
+    <div class="chips" style="margin-bottom:14px">${["All", "MP3 & WAV", "Unlimited Stems", "Exclusive"].map(x => `<button class="chip${acc.lf === x ? " on" : ""}" data-lf="${esc(x)}">${esc(x)}</button>`).join("")}</div><div id="libList"></div>`;
+}
+function drawLib() {
+  const el = $("libList"); if (!el) return;
+  if (!acc.loaded.b) { el.innerHTML = skel(); return; }
+  const q = acc.q.toLowerCase(), L = acc.buys.filter(p => (acc.lf === "All" || (LV[p.level] || p.license) === acc.lf) && (!q || (p.title || "").toLowerCase().includes(q)));
+  if (!L.length) { el.innerHTML = `<p class="empty">${acc.buys.length ? "No beats match your search." : "No purchases yet. Once your order is paid, your beats and files appear here."}</p>`; return; }
+  el.innerHTML = L.map(p => {
+    const fs = visFiles(p), lk = lockedN(p), loading = !(p.beatId in acc.files);
+    const grp = (t, n) => { const g = fs.filter(f => f.tier === t); return g.length ? `<div class="gr">${n}</div>` + g.map(f => `<div class="fl">${isAud(f.name) ? `<button class="ib" data-pf="${esc(f.path)}" aria-label="Play">▶</button>` : ""}<span class="nm2">${esc(f.title)}<small>${bytes(f.size || 0)}</small></span><button data-dl="${esc(f.path)}">Download</button></div>`).join("") : ""; };
+    return `<div class="card2" id="b-${esc(p.beatId)}"><div class="top"><div class="cv" ${p.cover ? `style="background-image:url('${esc(p.cover)}')"` : ""}>${p.cover ? "" : "♪"}</div>
+      <div class="bd"><b>${esc(p.title)}</b><span class="pl">${esc(LV[p.level] || p.license)}</span><small>Purchased ${dshort(p.createdAt)} · ${plural(fs.length, "file")}</small></div>
+      ${fs.length > 1 ? `<button class="ghost" data-dla="${esc(p.beatId)}">Download all</button>` : ""}</div>
+      ${grp("basic", "MP3 &amp; WAV")}${grp("stems", "Stems")}${fs.length ? "" : `<p class="empty" style="padding:10px 0 2px">${loading ? "Loading files…" : "Files are being added. Check back soon."}</p>`}
+      ${lk ? `<div class="lock">🔒 ${plural(lk, "stem file")} available with Unlimited Stems. <button class="lnk" data-go="${esc(p.beatId)}">Upgrade</button></div>` : ""}</div>`;
+  }).join("");
+  paintPlay();
+}
+function pOrd() {
+  if (!acc.loaded.o) return skel();
+  const L = acc.ords.filter(o => acc.of === "All" || (acc.of === "Paid") === (o.status === "paid"));
+  return `<div class="chips" style="margin-bottom:14px">${["All", "Paid", "Awaiting payment"].map(x => `<button class="chip${acc.of === x ? " on" : ""}" data-of="${x}">${x}</button>`).join("")}</div>` +
+    (L.map(o => { const paid = o.status === "paid", it = o.items || [];
+      return `<details class="od"><summary><div><b>${it.map(i => esc(i.title)).join(", ") || "Order"}</b><small>${dshort(o.createdAt)} · ${plural(it.length, "item")} · #${esc(o.id.slice(0, 8))}</small></div>
+        <div style="text-align:right"><b>${usd(o.total)}</b><br><span class="st ${paid ? "" : "new"}">${paid ? "Paid" : "Awaiting payment"}</span></div></summary>
+        <div class="odb">${it.map(i => `<div class="ln"><span>${esc(i.title)}<small>${esc(i.lic)}</small></span><span>${i.price != null ? usd(i.price) : ""}</span></div>`).join("")}
+        ${paid ? `<button class="ghost" data-tab-go="library" style="margin-top:8px">Go to files</button>` : `<p class="hint" style="color:var(--mute);font-size:13px;margin-top:8px">Your files unlock here once payment is confirmed.</p>`}</div></details>`; }).join("") || '<p class="empty">No orders here yet.</p>');
+}
+function pSet() {
+  return `<div class="set"><label>Display name<input id="sname" value="${esc(user.displayName || "")}" placeholder="Your name" autocomplete="name"></label>
+    <label>Email<input value="${esc(user.email)}" disabled></label>
+    <div class="row2"><button class="btn" data-savename>Save changes</button></div>
+    <div class="dsec" style="margin:10px 0 0"><span>Security</span></div>
+    <div class="row2"><button class="ghost" data-reset>Reset password</button><button class="ghost" data-out>Sign out</button></div></div>`;
+}
+async function playFile(path) {
+  if (faPath === path) { fa.paused ? fa.play() : fa.pause(); return; }
+  try { faPath = path; paintPlay(); fa.src = await getDownloadURL(ref(st, path)); await fa.play(); } catch { faPath = null; paintPlay(); aerr("Could not play this file."); }
+}
+async function dlFile(path) {
+  const a = document.createElement("a"); a.href = await getDownloadURL(ref(st, path)); a.download = ""; a.style.display = "none"; document.body.appendChild(a); a.click(); a.remove();
+}
+function goBeat(id) {
+  $("dAcct").close(); const i = shown.findIndex(b => b.id === id); if (i >= limit) { limit = i + 1; render(); }
+  const el = document.getElementById(id); if (el) { el.scrollIntoView({ block: "center", behavior: "smooth" }); el.classList.add("hit"); setTimeout(() => el.classList.remove("hit"), 3000); } else location.hash = id;
 }
 $("acct").onclick = e => { e.preventDefault(); openAcct(); };
 $("dAcct").onclick = async e => {
@@ -422,10 +537,27 @@ $("dAcct").onclick = async e => {
     try { const c = await signInWithPopup(auth, new GoogleAuthProvider());
       await setDoc(doc(db, "users", c.user.uid), { name: c.user.displayName || "", email: c.user.email, createdAt: serverTimestamp() }, { merge: true });
     } catch (err) { if (err.code !== "auth/popup-closed-by-user" && err.code !== "auth/cancelled-popup-request") aerr(err.code === "auth/popup-blocked" ? "Your browser blocked the popup. Allow popups and try again." : err); } }
+  if (d.tab) { acc.tab = d.tab; panel(); }
+  if (d.tabGo) { acc.tab = d.tabGo; panel(); $("dpanel")?.scrollIntoView({ block: "start" }); }
+  if (d.lf) { acc.lf = d.lf; panel(); }
+  if (d.of) { acc.of = d.of; panel(); }
+  if (d.open) { acc.tab = "library"; acc.q = ""; acc.lf = "All"; panel(); document.getElementById("b-" + d.open)?.scrollIntoView({ block: "start", behavior: "smooth" }); }
+  if (d.go) goBeat(d.go);
+  if (d.browse !== undefined) { $("dAcct").close(); location.hash = "beats"; }
+  if (d.pf) playFile(d.pf);
+  if (d.savename !== undefined) { const nm = $("sname").value.trim(), b = e.target; b.disabled = true;
+    try { await updateProfile(user, { displayName: nm }); await setDoc(doc(db, "users", user.uid), { name: nm, email: user.email }, { merge: true });
+      $("dname").textContent = nm || "Welcome"; document.querySelector(".av").textContent = (nm || user.email)[0].toUpperCase(); aerr("Saved.", true); } catch { aerr("Could not save. Try again."); }
+    b.disabled = false; }
   if (d.dl) { const b = e.target; b.disabled = true; const t = b.textContent; b.textContent = "Preparing…";
-    try { location.assign(await getDownloadURL(ref(st, d.dl))); } catch { aerr("Download failed. Make sure you are signed in and try again."); }
+    try { await dlFile(d.dl); } catch { aerr("Download failed. Make sure you are signed in and try again."); }
     setTimeout(() => { b.disabled = false; b.textContent = t; }, 1500); }
+  if (d.dla) { const p = acc.buys.find(x => x.beatId === d.dla), b = e.target; if (!p) return; b.disabled = true; const t = b.textContent; const fs = visFiles(p);
+    for (let i = 0; i < fs.length; i++) { b.textContent = `Downloading ${i + 1}/${fs.length}…`; try { await dlFile(fs[i].path); } catch { aerr("Some downloads failed. Allow multiple downloads in your browser and retry."); } await new Promise(r => setTimeout(r, 900)); }
+    b.disabled = false; b.textContent = t; }
 };
+$("dAcct").addEventListener("input", e => { if (e.target.id === "lq") { acc.q = e.target.value; drawLib(); } });
+$("dAcct").addEventListener("close", () => { fa.pause(); faPath = null; stopAcct(); });
 $("dAcct").onsubmit = async e => {
   e.preventDefault(); const em = $("aem").value.trim(), pw = $("apw").value;
   if (!/^\S+@\S+\.\S+$/.test(em)) return aerr("Enter a valid email address.");
