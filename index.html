@@ -105,7 +105,10 @@ dialog select,dialog textarea{width:100%;background:#0a0606;border:1px solid var
 .legal{white-space:pre-wrap}
 .doc h4{color:var(--gold);font-size:15px;margin:18px 0 6px}.doc h5{font-size:14px;margin:12px 0 4px}.doc p,.doc li{font-size:14px;color:var(--txt);margin:6px 0}.doc ul{padding-left:20px}.doc .eff{color:var(--mute)}
 
-dialog.dash{width:min(880px,96vw);padding:0;background:#0f0a0a}
+dialog.dash{width:100vw;max-width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;margin:0;border:0;border-radius:0;padding:0;background:#0f0a0a;overflow-y:auto}
+dialog.dash .dhd,dialog.dash .dtabs,dialog.dash #dpanel{padding-left:max(22px,calc((100vw - 1000px)/2));padding-right:max(22px,calc((100vw - 1000px)/2))}
+dialog.dash #dpanel{min-height:calc(100vh - 160px)}
+dialog.dash .aerr{margin-left:max(22px,calc((100vw - 1000px)/2))}
 .dhd{display:flex;align-items:center;gap:14px;padding:20px 22px;background:linear-gradient(120deg,rgba(168,0,0,.35),transparent),#140d0d;border-bottom:1px solid var(--line)}
 .av{width:52px;height:52px;border-radius:50%;background:var(--red);color:var(--gold);display:grid;place-items:center;font:400 22px Michroma,sans-serif;flex:none;border:2px solid var(--gold)}
 .who{flex:1;min-width:0}.who b{display:block;font-size:19px;overflow:hidden;text-overflow:ellipsis}.who small{color:var(--mute);overflow-wrap:anywhere}
@@ -143,7 +146,7 @@ details.od[open] summary{border-bottom:1px solid var(--line)}
 .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
 .skel{height:64px;border-radius:12px;background:linear-gradient(90deg,var(--panel),#1d1414,var(--panel));background-size:200% 100%;animation:sk 1.2s infinite;margin-bottom:10px}
 @keyframes sk{to{background-position:-200% 0}}
-@media(max-width:640px){.dhd,.dtabs,#dpanel{padding-left:14px;padding-right:14px}dialog.dash .aerr{margin-left:14px}}
+@media(max-width:640px){dialog.dash .dhd,dialog.dash .dtabs,dialog.dash #dpanel{padding-left:14px;padding-right:14px}dialog.dash .aerr{margin-left:14px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
