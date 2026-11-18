@@ -240,6 +240,8 @@ const audio = new Audio(); audio.preload = "none";
 const PAGE = 20;
 let beats = [], shown = [], cur = null, tag = "All", cart = [], limit = PAGE;
 try { cart = JSON.parse(localStorage.getItem("yc") || "[]"); } catch {}
+// Prices are fixed by license and re-applied from the LIC table, so a tampered cart cannot change what is shown. The payment server also sets prices itself.
+cart = (Array.isArray(cart) ? cart : []).map(c => { const i = +String(c.id || "").split("|")[1]; const l = LIC[i]; return l && l[2] != null ? { id: c.id, title: String(c.title || ""), lic: l[0], price: l[2], cover: c.cover || "" } : null; }).filter(Boolean);
 const DEF = { contact: CONTACT, hero: "",
   licensing: "MP3 & WAV: $40.00. MP3 and WAV files.\nUnlimited Stems: $200.00. MP3, WAV and stems with unlimited use.\nExclusive: make an offer. MP3, WAV and stems with exclusive rights.\n\nYour files appear in your account for download once payment is confirmed. Contact us for the full contract." };
 

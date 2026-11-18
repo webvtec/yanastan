@@ -5,27 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Yanastan Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--red:#a80000;--red2:#7d0000;--gold:#c9a45c;--bg:#0a0a0a;--panel:#141010;--panel2:#1a1313;--line:#2a1f1f;--txt:#efe6d2;--mute:#9a8f7c;--ok:#6fbf8a}
+:root{--red:#a80000;--red2:#7d0000;--gold:#c9a45c;--bg:#0a0a0a;--panel:#141010;--panel2:#1a1313;--line:#2a1f1f;--txt:#efe6d2;--mute:#9a8f7c;--ok:#6fbf8a;--bad:#ff6b6b}
 *{box-sizing:border-box;margin:0}
 body{background:radial-gradient(900px 380px at 85% -120px,rgba(168,0,0,.22),transparent),var(--bg);color:var(--txt);font:500 16px/1.45 Barlow,system-ui,sans-serif;min-height:100vh}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+[hidden]{display:none!important}
 header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 24px;background:rgba(10,10,10,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:12px}
 .brand i{width:36px;height:36px;border-radius:50%;background:var(--red);display:grid;place-items:center;font:normal 18px Michroma,sans-serif;color:var(--gold)}
-.brand span{display:block;color:var(--mute);font-size:13px;font-weight:500}
+.brand span{display:block;color:var(--mute);font-size:13px}
 h1{font:400 15px Michroma,sans-serif;color:var(--gold);letter-spacing:.04em}
 h2{font:400 15px Michroma,sans-serif;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;gap:10px}
 h2 .ct{font:600 13px Barlow,sans-serif;color:var(--mute);background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:1px 10px}
-.hd-r{display:flex;align-items:center;gap:10px}
+.hd-r{display:flex;align-items:center;gap:14px}
 .wrap{max-width:1000px;margin:auto;padding:28px 20px 60px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.stat b{display:block;font:400 22px Michroma,sans-serif;color:var(--gold);margin-bottom:4px}
+.stat span{color:var(--mute);font-size:13px}
+
 .tabs{display:flex;gap:6px;overflow-x:auto;padding:5px;margin-bottom:24px;background:var(--panel);border:1px solid var(--line);border-radius:12px;width:fit-content;max-width:100%}
 .tabs button{background:none;border:0;color:var(--mute);white-space:nowrap;padding:9px 18px;border-radius:8px;display:flex;align-items:center;gap:8px;transition:background .15s,color .15s}
-.tabs button:hover{color:var(--txt)}
+.tabs button:hover{color:var(--txt);background:none}
 .tabs button.on{background:var(--red);color:var(--gold)}
 .tabs span:not(:empty){background:var(--gold);color:#000;font-size:12px;font-weight:700;border-radius:20px;padding:0 7px;line-height:18px}
+
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:24px}
 form,.grid{display:grid;gap:16px;grid-template-columns:repeat(2,1fr)}.full{grid-column:1/-1}
 label{display:grid;gap:6px;color:var(--mute);font-size:14px;font-weight:600}
@@ -39,12 +47,18 @@ button{background:var(--red);color:var(--gold);border:0;padding:11px 22px;border
 button:hover{background:#c00000}
 button.g{background:none;border:1px solid var(--line);color:var(--mute);padding:6px 14px;font-size:14px}
 button.g:hover{border-color:var(--gold);color:var(--gold);background:none}
-button.del:hover{border-color:#ff6b6b;color:#ff6b6b}
+button.del:hover,button.dng.g:hover{border-color:var(--bad);color:var(--bad)}
+button.dng:not(.g){background:#8f1d1d;color:#fff}
 button:disabled{opacity:.5;cursor:wait}
+
+.pricing{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:12px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--mute);font-size:14px}
+.pricing b{color:var(--gold)}
+
 #login{max-width:380px;margin:12vh auto;padding:32px;background:var(--panel);border:1px solid var(--line);border-radius:14px;text-align:center}
 #login .brand{justify-content:center;margin-bottom:6px}
 #login p.sub{color:var(--mute);margin:0 0 24px;font-size:15px}
 #login button{width:100%;padding:13px}
+
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px 12px;margin:0 -12px;border-bottom:1px solid var(--line);border-radius:10px;transition:background .15s}
 .row:last-child{border-bottom:0}.row:hover{background:var(--panel2)}
 .row .m{flex:1;min-width:180px;overflow-wrap:anywhere}.row .m b{font-weight:600}
@@ -55,24 +69,21 @@ button:disabled{opacity:.5;cursor:wait}
 .tag{font-size:12px;font-weight:700;letter-spacing:.03em;padding:3px 11px;border-radius:20px;border:1px solid var(--line);color:var(--ok);text-transform:capitalize}
 .tag.hot{color:#000;background:var(--gold);border-color:var(--gold)}
 .pill{display:inline-block;font-size:12px;padding:1px 9px;border-radius:20px;border:1px solid var(--line);margin-left:6px;color:var(--mute)}.pill.ok{color:var(--ok);border-color:rgba(111,191,138,.35)}.pill.no{color:#ff9a6b;border-color:rgba(255,154,107,.35)}
-#msg{min-height:20px;color:var(--gold);font-size:14px}.err{color:#ff6b6b!important}
+#msg{min-height:20px;color:var(--gold);font-size:14px}.err{color:var(--bad)!important}
 .empty{color:var(--mute);text-align:center;padding:28px 0}
-.pl{display:grid;gap:8px;margin:0 0 14px}
-dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:22px;width:min(680px,95vw);max-height:92vh;overflow:auto}
-dialog::backdrop{background:rgba(0,0,0,.75)}
-.dh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}.dh h2{margin:0}
-.sec{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
-.sec h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.fr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;margin-bottom:8px;padding:8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
-.fr input{padding:8px 10px}.fr small{color:var(--mute);font-weight:400;white-space:nowrap}
-.fr .nm{grid-column:1/-1;color:var(--mute);font-size:12px;overflow-wrap:anywhere}
-.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;grid-column:1/-1}.bar i{display:block;height:100%;width:0;background:var(--gold)}
-.plus{width:100%;border:1px dashed var(--line);background:none;color:var(--gold);padding:11px}.plus:hover{border-color:var(--gold);background:var(--panel2)}
-@media(max-width:640px){.fr{grid-template-columns:1fr auto}.fr small{display:none}dialog{padding:16px}}
-@media(max-width:640px){form,.grid{grid-template-columns:1fr}header{padding:12px 16px}.card{padding:18px}.tabs{width:100%}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.notes{margin-top:6px;font-weight:400;color:var(--txt);font-size:15px;white-space:pre-wrap}
 
-[hidden]{display:none!important}
+dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:22px;width:min(680px,95vw);max-height:92vh;overflow:auto;margin:auto}
+dialog::backdrop{background:rgba(0,0,0,.75)}
+dialog.sm{width:min(440px,94vw)}
+dialog.sm h2{margin-bottom:10px}
+dialog.sm p{color:var(--mute);font-size:15px;margin-bottom:20px;overflow-wrap:anywhere}
+.acts{display:flex;justify-content:flex-end;gap:10px;grid-column:1/-1}
+.dh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}.dh h2{margin:0}
+
+#toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,10px);background:var(--panel2);border:1px solid var(--gold);color:var(--txt);padding:11px 20px;border-radius:10px;font-weight:600;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}#toast.bad{border-color:var(--bad);color:var(--bad)}
+
 .fm{display:grid;gap:14px}
 .fm-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .fm-h b{font:400 13px Michroma,sans-serif;color:var(--gold)}
@@ -98,14 +109,19 @@ dialog::backdrop{background:rgba(0,0,0,.75)}
 .dz.has{border-style:solid;border-color:rgba(111,191,138,.5);color:var(--ok)}
 .dz input{display:none}
 .fr2 .x{align-self:center;padding:6px 12px}
-.fr2 .bar{display:none;grid-column:1/-1}.fr2.busy .bar{display:block}
-.fr2.fail{border-color:#ff6b6b}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;grid-column:1/-1;display:none}.bar i{display:block;height:100%;width:0;background:var(--gold)}
+.fr2.busy .bar{display:block}
+.fr2.fail{border-color:var(--bad)}
+.plus{width:100%;border:1px dashed var(--line);background:none;color:var(--gold);padding:11px}.plus:hover{border-color:var(--gold);background:var(--panel2)}
 .pubrow{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .pubrow button{padding:13px 30px}
 #up-all{width:100%;margin-top:4px}
-@media(max-width:640px){.fr2{grid-template-columns:1fr auto}.fr2 .dz{grid-column:1/-1;order:3}}
-</style>
 
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){form,.grid{grid-template-columns:1fr}header{padding:12px 16px}.card{padding:18px}.tabs{width:100%}
+ .fr2{grid-template-columns:1fr auto}.fr2 .dz{grid-column:1/-1;order:3}dialog{padding:16px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
 </head>
 <body>
 <section id="login" hidden>
@@ -118,6 +134,13 @@ dialog::backdrop{background:rgba(0,0,0,.75)}
 <section id="app" hidden>
   <header><div class="brand"><i>Y</i><div><h1>Yanastan</h1><span>Dashboard</span></div></div><div class="hd-r"><a href="index.html">View site</a><button class="g" id="out">Sign out</button></div></header>
   <div class="wrap">
+    <div class="stats">
+      <div class="stat"><b id="sB">0</b><span>Beats</span></div>
+      <div class="stat"><b id="sO">0</b><span>Orders awaiting payment</span></div>
+      <div class="stat"><b id="sR">$0.00</b><span>Paid revenue</span></div>
+      <div class="stat"><b id="sQ">0</b><span>New requests</span></div>
+    </div>
+
     <div class="tabs" id="tabs">
       <button data-t="beats" class="on">Beats</button><button data-t="orders">Orders <span id="oc"></span></button>
       <button data-t="requests">Requests <span id="rc"></span></button>
@@ -128,14 +151,14 @@ dialog::backdrop{background:rgba(0,0,0,.75)}
         <form id="af">
           <label>Title<input id="title" required></label>
           <label>BPM<input id="bpm" type="number" min="40" max="220"></label>
-          <label>Tags <span class="hint">Separate with commas</span><input id="tags" placeholder="Dancehall, type beat"></label>
-          <label>MP3 lease price (USD) <span class="hint">Leave blank for $60</span><input id="price" type="number" min="0" step="0.01"></label>
+          <label class="full">Tags <span class="hint">Separate with commas</span><input id="tags" placeholder="Dancehall, type beat"></label>
+          <div class="full pricing">Pricing is fixed for every beat: <b>MP3 &amp; WAV $40.00</b> · <b>Unlimited Stems $200.00</b> · Exclusive by offer</div>
           <label class="full">Preview audio <span class="hint">The clip visitors hear on the site</span><input id="file" type="file" accept="audio/*"></label>
           <label class="full">Cover image <span class="hint">Optional</span><input id="cover" type="file" accept="image/*"></label>
           <div class="full fm-h"><b>Downloadable files</b><span class="hint">Turn on what this beat includes. Add as many files as you need.</span></div>
           <div class="full" id="fmNew"></div>
           <div class="full pubrow"><button id="add">Publish beat</button><span class="hint">Everything uploads together, no second step.</span></div>
-          <p class="full" id="msg"></p>
+          <p class="full" id="msg" role="status"></p>
         </form>
       </div>
       <div class="card"><h2>All beats <span class="ct" id="n">0</span></h2><div id="list"></div></div>
@@ -143,20 +166,22 @@ dialog::backdrop{background:rgba(0,0,0,.75)}
 
     <div id="t-orders" hidden><div class="card"><h2>Orders</h2><div id="orders"></div></div></div>
     <div id="t-requests" hidden><div class="card"><h2>Custom beat and mix and master requests</h2><div id="requests"></div></div></div>
-
   </div>
 </section>
 
 <dialog id="dFiles"></dialog>
+<dialog id="dAsk" class="sm"></dialog>
+<dialog id="dEdit" class="sm"></dialog>
+<div id="toast" role="status"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
 const ADMIN_EMAIL = "YOUR_ADMIN_EMAIL_HERE"; // the producer's Google email, same as in the rules
-const ADMIN_UID = "BBS0vo8W1sdJ118GCJdAF63Q7eC3"; // optional: the producer's Firebase UID (Authentication > Users). If set, it is checked instead of the email.
+const ADMIN_UID = "BBS0vo8W1sdJ118GCJdAF63Q7eC3"; // if set, this is checked instead of the email
 const app = initializeApp({
   apiKey: "AIzaSyDZz7eQ7KieJI4A3692xFp6S0DDudyoShY",
   authDomain: "yanastan-com.firebaseapp.com",
@@ -170,10 +195,39 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const say = (t, bad) => { $("msg").textContent = t; $("msg").className = bad ? "err" : ""; };
 const day = t => t?.seconds ? new Date(t.seconds * 1000).toLocaleDateString() : "";
-let unsubs = [], orderMap = {}, fileUnsub = null, fileBeat = null;
+let unsubs = [], orderMap = {}, fileUnsub = null, tt;
+const stat = { orders: [], reqs: [] };
+
+/* ---------- in-page toast + dialogs (no browser pop-ups) ---------- */
+function toast(t, bad) { const e = $("toast"); e.textContent = t; e.className = "on" + (bad ? " bad" : ""); clearTimeout(tt); tt = setTimeout(() => e.className = "", 3200); }
+function ask(title, body, ok = "Confirm", danger = false) {
+  return new Promise(res => {
+    const d = $("dAsk"); d.returnValue = "";
+    d.innerHTML = `<h2>${esc(title)}</h2><p>${esc(body)}</p><form method="dialog" class="acts"><button class="g" value="n">Cancel</button><button class="${danger ? "dng" : ""}" value="y" autofocus>${esc(ok)}</button></form>`;
+    d.addEventListener("close", () => res(d.returnValue === "y"), { once: true });
+    d.showModal();
+  });
+}
+function editBeat(b) {
+  return new Promise(res => {
+    const d = $("dEdit"); d.returnValue = "";
+    d.innerHTML = `<h2>Edit beat</h2><form id="ef"><label class="full">Title<input id="et" value="${esc(b.title)}" required></label><label class="full">BPM<input id="eb" type="number" min="40" max="220" value="${esc(b.bpm)}"></label>
+      <div class="acts"><button type="button" class="g" data-cancel>Cancel</button><button>Save changes</button></div></form>`;
+    let out = null;
+    d.querySelector("[data-cancel]").onclick = () => d.close();
+    d.querySelector("#ef").onsubmit = e => { e.preventDefault(); out = { title: $("et").value.trim(), bpm: +$("eb").value || 0 }; d.close(); };
+    d.addEventListener("close", () => res(out), { once: true });
+    d.showModal();
+  });
+}
 
 const watch = (name, fn) => onSnapshot(query(collection(db, name), orderBy("createdAt", "desc")), s => fn(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 const none = t => `<p class="empty">${t}</p>`;
+function paintStats() {
+  $("sO").textContent = stat.orders.filter(o => o.status !== "paid").length;
+  $("sR").textContent = "$" + stat.orders.filter(o => o.status === "paid").reduce((s, o) => s + Number(o.total || 0), 0).toFixed(2);
+  $("sQ").textContent = stat.reqs.filter(r => r.status === "new").length;
+}
 
 onAuthStateChanged(auth, u => {
   const ok = u && (ADMIN_UID ? u.uid === ADMIN_UID : (u.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
@@ -183,15 +237,16 @@ onAuthStateChanged(auth, u => {
   if (!ok) return;
 
   unsubs.push(watch("beats", L => {
-    $("n").textContent = L.length;
+    $("n").textContent = L.length; $("sB").textContent = L.length;
     $("list").innerHTML = L.map(b => `<div class="row">${b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="">` : `<div class="ph">♪</div>`}
-      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM · ${b.price ? "$" + esc(b.price) : "$60 default"}<span class="pill ${(b.nBasic || 0) + (b.nStems || 0) ? "ok" : "no"}">${b.nBasic || 0} MP3/WAV · ${b.nStems || 0} stems</span></small></div>
+      <div class="m"><b>${esc(b.title)}</b><small>${esc(b.bpm || "-")} BPM<span class="pill ${(b.nBasic || 0) + (b.nStems || 0) ? "ok" : "no"}">${b.nBasic || 0} MP3/WAV · ${b.nStems || 0} stems</span></small></div>
       <button data-f="${b.id}" data-t="${esc(b.title)}">Files</button>
-      <button class="g" data-e="${b.id}" data-t="${esc(b.title)}" data-b="${esc(b.bpm)}" data-p="${esc(b.price)}">Edit</button>
-      <button class="g del" data-d="${b.id}">Delete</button></div>`).join("") || none("No beats yet. Add your first one above.");
+      <button class="g" data-e="${b.id}" data-t="${esc(b.title)}" data-b="${esc(b.bpm)}">Edit</button>
+      <button class="g del" data-d="${b.id}" data-t="${esc(b.title)}">Delete</button></div>`).join("") || none("No beats yet. Add your first one above.");
   }));
 
   unsubs.push(watch("orders", L => {
+    stat.orders = L; paintStats();
     $("oc").textContent = L.filter(o => o.status === "new").length || "";
     $("orders").innerHTML = L.map(o => { const paid = o.status === "paid";
       return `<div class="row"><div class="m"><b>${esc(o.name || o.email)}</b><small>${esc(o.email)} · ${day(o.createdAt)}${o.uid ? "" : " · guest order, no account"}</small>
@@ -203,13 +258,13 @@ onAuthStateChanged(auth, u => {
   }));
 
   unsubs.push(watch("requests", L => {
+    stat.reqs = L; paintStats();
     $("rc").textContent = L.filter(r => r.status === "new").length || "";
-    $("requests").innerHTML = L.map(r => `<div class="row"><div class="m"><b>${esc(r.type)}: ${esc(r.name)}</b><small>${esc(r.email)} · ${day(r.createdAt)}</small><p style="margin-top:4px;font-weight:400">${esc(r.notes)}</p></div>
+    $("requests").innerHTML = L.map(r => `<div class="row"><div class="m"><b>${esc(r.type)}: ${esc(r.name)}</b><small>${esc(r.email)} · ${day(r.createdAt)}</small><p class="notes">${esc(r.notes)}</p></div>
       <span class="tag ${r.status === "new" ? "hot" : ""}">${esc(r.status)}</span>
       <button class="g" data-rs="${r.id}" data-s="${r.status === "new" ? "done" : "new"}">${r.status === "new" ? "Mark done" : "Reopen"}</button>
       <button class="g del" data-rd="${r.id}">Delete</button></div>`).join("") || none("No requests yet.");
   }));
-
 });
 
 $("gbtn").onclick = async () => {
@@ -219,7 +274,7 @@ $("gbtn").onclick = async () => {
     if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") return;
     $("lerr").textContent = err.code === "auth/unauthorized-domain" ? "Add this domain in Firebase Authentication > Settings > Authorized domains."
       : err.code === "auth/operation-not-allowed" ? "Turn on Google in Firebase Authentication > Sign-in method."
-      : err.code === "auth/popup-blocked" ? "Your browser blocked the popup. Allow popups and try again." : "Google sign-in failed. Try again.";
+      : err.code === "auth/popup-blocked" ? "Your browser blocked the sign-in window. Allow popups and try again." : "Google sign-in failed. Try again.";
   }
 };
 $("out").onclick = () => signOut(auth);
@@ -244,45 +299,45 @@ $("af").onsubmit = async e => {
     const audioUrl = await getDownloadURL(await upload("beats", f, "preview"));
     const coverUrl = c ? await getDownloadURL(await upload("covers", c, "cover")) : "";
     const title = $("title").value.trim();
+    // No price is stored on a beat. Prices are fixed by the payment server.
     const r = await addDoc(collection(db, "beats"), { title, bpm: +$("bpm").value || 0, tags: $("tags").value.trim() || "Dancehall",
-      price: $("price").value || "", audioUrl, coverUrl, exclusive: false, duration: dur, nBasic: 0, nStems: 0, createdAt: serverTimestamp() });
+      audioUrl, coverUrl, exclusive: false, duration: dur, nBasic: 0, nStems: 0, createdAt: serverTimestamp() });
     const failed = await fmNew.uploadAll(r.id, say);
     await syncCounts(r.id);
     $("af").reset(); fmNew.reset();
     say(failed ? `Published, but ${failed} file${failed > 1 ? "s" : ""} failed. Open Files on the beat to retry.` : "Published. The beat and all its files are live.", !!failed);
+    if (!failed) toast("Beat published");
   } catch (err) { say("Failed: " + err.message, true); }
   $("add").disabled = false;
 };
 
 document.addEventListener("click", async e => {
-  const d = e.target.dataset; if (!e.target.closest("button")) return;
+  const btn = e.target.closest("button"); if (!btn) return; const d = btn.dataset;
   try {
     if (d.f) openFiles(d.f, d.t);
-    if (d.d && confirm("Delete this beat and all its files? Customers who bought it will lose their downloads.")) {
+    if (d.d && await ask("Delete this beat?", `"${d.t}" and all its files will be removed. Customers who bought it will lose their downloads.`, "Delete beat", true)) {
       const fs = await getDocs(collection(db, "beats", d.d, "files"));
       for (const x of fs.docs) { try { await deleteObject(ref(st, x.data().path)); } catch {} await deleteDoc(x.ref); }
-      await deleteDoc(doc(db, "beats", d.d));
+      await deleteDoc(doc(db, "beats", d.d)); toast("Beat deleted");
     }
     if (d.op) await grant(orderMap[d.op]);
-    if (d.ov && confirm("Revoke this customer's access and reopen the order?")) await revoke(orderMap[d.ov]);
+    if (d.ov && await ask("Revoke access?", "This removes the customer's access to these beats and reopens the order.", "Revoke access", true)) { await revoke(orderMap[d.ov]); toast("Access revoked"); }
     if (d.e) {
-      const title = prompt("Title", d.t); if (title === null) return;
-      const bpm = prompt("BPM", d.b); if (bpm === null) return;
-      const price = prompt("MP3 lease price in USD (blank = $60)", d.p); if (price === null) return;
-      await updateDoc(doc(db, "beats", d.e), { title: title.trim() || d.t, bpm: +bpm || 0, price: price.trim() });
+      const v = await editBeat({ title: d.t, bpm: d.b }); if (!v) return;
+      await updateDoc(doc(db, "beats", d.e), { title: v.title || d.t, bpm: v.bpm }); toast("Beat updated");
     }
     if (d.os) await updateDoc(doc(db, "orders", d.os), { status: d.s });
-    if (d.od && confirm("Delete this order?")) await deleteDoc(doc(db, "orders", d.od));
+    if (d.od && await ask("Delete this order?", "This cannot be undone.", "Delete order", true)) { await deleteDoc(doc(db, "orders", d.od)); toast("Order deleted"); }
     if (d.rs) await updateDoc(doc(db, "requests", d.rs), { status: d.s });
-    if (d.rd && confirm("Delete this request?")) await deleteDoc(doc(db, "requests", d.rd));
-  } catch (err) { alert("Failed: " + err.message); }
+    if (d.rd && await ask("Delete this request?", "This cannot be undone.", "Delete request", true)) { await deleteDoc(doc(db, "requests", d.rd)); toast("Request deleted"); }
+  } catch (err) { toast("Failed: " + err.message, true); }
 });
 
 /* ---------- orders: unlock / revoke purchases ---------- */
 const LEVEL = { "MP3 & WAV": 1, "Unlimited Stems": 2, "Exclusive": 3 };
 async function grant(o) {
-  if (!o?.uid) return alert("This order has no customer account.");
-  if (!confirm(`Confirm you received $${Number(o.total).toFixed(2)} from ${o.email}? Their files unlock immediately.`)) return;
+  if (!o?.uid) return toast("This order has no customer account.", true);
+  if (!await ask("Confirm payment received", `Did you receive $${Number(o.total).toFixed(2)} from ${o.email}? Their files unlock immediately.`, "Mark paid & unlock")) return;
   const b = writeBatch(db);
   const best = {};
   for (const i of o.items || []) { const id = i.id.split("|")[0]; const lv = LEVEL[i.lic] || 1; if (!best[id] || lv > best[id].level) best[id] = { level: lv, i }; }
@@ -292,7 +347,7 @@ async function grant(o) {
     b.set(pr, { beatId: id, title: best[id].i.title, cover: best[id].i.cover || "", license: best[id].i.lic, level: best[id].level, orderId: o.id, createdAt: serverTimestamp() });
   }
   b.update(doc(db, "orders", o.id), { status: "paid", paidAt: serverTimestamp() });
-  await b.commit();
+  await b.commit(); toast("Order marked paid. Files unlocked.");
 }
 async function revoke(o) {
   const b = writeBatch(db);
@@ -345,15 +400,15 @@ function makeFM(root, beatId) {
     const el = e.target, r = el.closest(".fr2");
     if (el.dataset.sw) { const t = el.dataset.sw; S[t].on = el.checked; if (el.checked && !S[t].rows.length) S[t].rows.push(mkRow()); draw(); }
     else if (el.dataset.pick !== undefined && r) setFiles(r.dataset.t, +r.dataset.k, el.files);
-    else if (el.dataset.rn) { const v = el.value.trim(); if (v) await updateDoc(doc(db, "beats", beatId, "files", el.dataset.rn), { title: v }); }
+    else if (el.dataset.rn) { const v = el.value.trim(); if (v) { await updateDoc(doc(db, "beats", beatId, "files", el.dataset.rn), { title: v }); toast("Title saved"); } }
   });
   root.addEventListener("click", async e => {
     const b = e.target.closest("button"); if (!b) return; const d = b.dataset;
     if (d.addrow) { const t = d.addrow; S[t].rows.push(mkRow()); drawRows(t); root.querySelector(`[data-rows="${t}"] .fr2:last-child .ti`)?.focus(); }
     if (d.delrow !== undefined) { const r = b.closest(".fr2"), t = r.dataset.t; S[t].rows = S[t].rows.filter(x => x.k !== +r.dataset.k); drawRows(t); }
-    if (d.rm && confirm("Remove this file? Customers will no longer be able to download it.")) {
+    if (d.rm && await ask("Remove this file?", "Customers will no longer be able to download it.", "Remove file", true)) {
       try { await deleteObject(ref(st, d.p)); } catch {}
-      await deleteDoc(doc(db, "beats", beatId, "files", d.rm)); await syncCounts(beatId);
+      await deleteDoc(doc(db, "beats", beatId, "files", d.rm)); await syncCounts(beatId); toast("File removed");
     }
     if (d.upall !== undefined) {
       b.disabled = true; const msg = root.querySelector("[data-fmmsg]");
@@ -367,7 +422,7 @@ function makeFM(root, beatId) {
 
   const api = {
     reset() { S.basic = { on: true, rows: [mkRow()], live: [] }; S.stems = { on: false, rows: [], live: [] }; draw(); },
-    setLive(L) { TIERS.forEach(([t]) => { const was = S[t].live.length; S[t].live = L.filter(f => f.tier === t).sort((a, b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
+    setLive(L) { TIERS.forEach(([t]) => { S[t].live = L.filter(f => f.tier === t).sort((a, b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
       if (!api.init && S[t].live.length) S[t].on = true; });
       if (!api.init) { api.init = true; TIERS.forEach(([t]) => { if (S[t].on && !S[t].rows.length) S[t].rows.push(mkRow()); }); draw(); } else TIERS.forEach(([t]) => drawLive(t)); },
     async uploadAll(id, say) {
@@ -394,7 +449,6 @@ function makeFM(root, beatId) {
 const fmNew = makeFM($("fmNew"), null);
 let fm = null;
 function openFiles(id, title) {
-  fileBeat = id;
   $("dFiles").innerHTML = `<div class="dh"><h2>Files: ${esc(title)}</h2><button class="g" data-fx>Close</button></div>
     <p class="hint" style="margin-bottom:14px">Flip a switch to offer MP3 &amp; WAV or stems for this beat, then add as many titled files as you need and press Upload.</p><div id="fmRoot"></div>`;
   fm = makeFM($("fmRoot"), id);
