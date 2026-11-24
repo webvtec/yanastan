@@ -226,7 +226,7 @@ const app = initializeApp({
 const db = getFirestore(app), auth = getAuth(app), st = getStorage(app);
 let user = null;
 let mode = "in", accUnsubs = [], afterAuth = null;
-const ADMIN_UID = "BBS0vo8W1sdJ118GCJdAF63Q7eC3";
+const ADMIN_UID = "gGllTd5eMLUnWj8lWGdOPomgC1A2";
 onAuthStateChanged(auth, u => { user = u; $("acct").textContent = u ? "My account" : "Sign in"; $("adminLink").hidden = !(u && u.uid === ADMIN_UID);
   if (u && afterAuth) { const f = afterAuth; afterAuth = null; $("dAcct").close(); f(); }
   else if ($("dAcct").open) renderAcct();
